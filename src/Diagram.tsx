@@ -7,6 +7,7 @@ import ReactFlow, {
 } from 'reactflow';
 
 import 'reactflow/dist/style.css';
+import { Button } from './components/ui/button';
 
 const initNodes = [
   {
@@ -45,6 +46,7 @@ function Diagram({ }: Props) {
       onEdgesChange={onEdgesChange}
       fitView
     >
+      <Button>Foo</Button>
       <Background />
       <Controls />
       <MiniMap />

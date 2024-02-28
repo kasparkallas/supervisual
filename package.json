@@ -11,12 +11,18 @@
     "tailwind:watch": "tailwindcss -i ./styles/index.css -o ./public/index.css --watch"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.0.2",
     "@tanstack/react-query": "^5.24.1",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
     "graphql": "^16.8.1",
+    "lucide-react": "^0.343.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "reactflow": "^11.10.3",
-    "subgraph": "workspace:*"
+    "subgraph": "workspace:*",
+    "tailwind-merge": "^2.2.1",
+    "tailwindcss-animate": "^1.0.7"
   },
   "license": "MIT",
   "devDependencies": {
