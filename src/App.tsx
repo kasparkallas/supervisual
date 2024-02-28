@@ -1,17 +1,14 @@
-import {
-    QueryClient,
-    QueryClientProvider,
-} from '@tanstack/react-query'
-import DiagramProvider from './DiagramProvider';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import DiagramProvider from "./DiagramProvider";
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient();
 
 function App() {
-    return (
-        <QueryClientProvider client={queryClient}>
-            <DiagramProvider />
-        </QueryClientProvider>
-    )
+  return (
+    <QueryClientProvider client={queryClient}>
+      <DiagramProvider />
+    </QueryClientProvider>
+  );
 }
 
 export default App;

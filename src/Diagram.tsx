@@ -4,37 +4,35 @@ import ReactFlow, {
   MiniMap,
   useNodesState,
   useEdgesState,
-} from 'reactflow';
+} from "reactflow";
 
-import 'reactflow/dist/style.css';
-import { Button } from './components/ui/button';
+import "reactflow/dist/style.css";
+import { Button } from "./components/ui/button";
 
 const initNodes = [
   {
-    id: 'a',
-    data: { label: 'Node A' },
+    id: "a",
+    data: { label: "Node A" },
     position: { x: 250, y: 0 },
   },
   {
-    id: 'b',
-    data: { label: 'Node B' },
+    id: "b",
+    data: { label: "Node B" },
     position: { x: 100, y: 100 },
   },
 ];
 
 const initEdges = [
   {
-    id: 'a-b',
-    source: 'a',
-    target: 'b',
+    id: "a-b",
+    source: "a",
+    target: "b",
   },
 ];
 
-type Props = {
+type Props = {};
 
-};
-
-function Diagram({ }: Props) {
+function Diagram({}: Props) {
   const [nodes, , onNodesChange] = useNodesState(initNodes);
   const [edges, , onEdgesChange] = useEdgesState(initEdges);
 
