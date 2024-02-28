@@ -29,7 +29,11 @@ const initEdges = [
   },
 ];
 
-function Diagram() {
+type Props = {
+
+};
+
+function Diagram({ }: Props) {
   const [nodes, , onNodesChange] = useNodesState(initNodes);
   const [edges, , onEdgesChange] = useEdgesState(initEdges);
 
