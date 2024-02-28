@@ -1,0 +1,13 @@
+sources:
+  - name: protocol
+    handler:
+      graphql:
+        endpoint: "{context.url:https://polygon-mainnet.subgraph.x.superfluid.dev/}"
+        retry: 5
+documents:
+  - "./*.graphql"
+codegen:
+  scalars:
+    BigInt: string
+    Bytes: string
+    BigDecimal: string
