@@ -3,18 +3,20 @@ import { useQuery } from "@tanstack/react-query";
 import { getBuiltGraphSDK, AllRelevantEntitiesQuery } from "subgraph";
 
 import Diagram from "./Diagram";
+import { Input } from "./routes";
 
 const sdk = getBuiltGraphSDK();
 
-function DiagramProvider() {
+type Props = Input;
+
+function DiagramProvider({ account, token }: Props) {
   const result = useQuery({
     // todo, query key based on account and token
-    queryKey: ["ExampleQuery"],
+    queryKey: [account, token],
     queryFn: () =>
       sdk.AllRelevantEntities({
-        // toLower
-        account: "",
-        token: "",
+        account: account,
+        token: token,
       }),
     // select: (data) => {
     //     data.

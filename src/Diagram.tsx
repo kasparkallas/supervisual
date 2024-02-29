@@ -44,7 +44,6 @@ function Diagram({}: Props) {
       onEdgesChange={onEdgesChange}
       fitView
     >
-      <Button>Foo</Button>
       <Background />
       <Controls />
       <MiniMap />
