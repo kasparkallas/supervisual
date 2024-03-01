@@ -7,10 +7,10 @@ import { isAddress } from "viem";
 const ethereumAddress = z
   .string()
   .trim()
+  .transform((x) => x.toLowerCase())
   .refine(isAddress, {
     message: "Invalid Ethereum address",
-  })
-  .transform((x) => x.toLowerCase());
+  });
 
 const input = z.object({
   token: ethereumAddress,

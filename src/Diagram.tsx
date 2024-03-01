@@ -1,40 +1,58 @@
 import ReactFlow, {
-  Controls,
   Background,
-  MiniMap,
   useNodesState,
   useEdgesState,
+  Node,
+  Edge,
+  Controls,
+  MiniMap,
 } from "reactflow";
+import Dagre from "@dagrejs/dagre";
 
 import "reactflow/dist/style.css";
-import { Button } from "./components/ui/button";
+import { useMemo } from "react";
 
-const initNodes = [
-  {
-    id: "a",
-    data: { label: "Node A" },
-    position: { x: 250, y: 0 },
-  },
-  {
-    id: "b",
-    data: { label: "Node B" },
-    position: { x: 100, y: 100 },
-  },
-];
+type Props = {
+  nodes: Node[];
+  edges: Edge[];
+};
 
-const initEdges = [
-  {
-    id: "a-b",
-    source: "a",
-    target: "b",
-  },
-];
+const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
 
-type Props = {};
+const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
+  if (!nodes.length) {
+    return { nodes, edges };
+  }
 
-function Diagram({}: Props) {
-  const [nodes, , onNodesChange] = useNodesState(initNodes);
-  const [edges, , onEdgesChange] = useEdgesState(initEdges);
+  g.setGraph({
+    rankdir: "TB",
+    nodesep: 250,
+    ranksep: 250,
+    ranker: "longest-path",
+  });
+
+  edges.forEach((edge) => g.setEdge(edge.source, edge.target));
+  nodes.forEach((node) => g.setNode(node.id, node as any)); // TODO: fix types
+
+  Dagre.layout(g);
+
+  return {
+    nodes: nodes.map((node) => {
+      const { x, y } = g.node(node.id);
+      return { ...node, position: { x, y } };
+    }),
+    edges,
+  };
+};
+
+function Diagram(props: Props) {
+  const layoutedElements = useMemo(
+    () => getLayoutedElements(props.nodes, props.edges),
+    [props.nodes, props.edges],
+  );
+
+  const [nodes, , onNodesChange] = useNodesState(layoutedElements.nodes);
+  const [edges, , onEdgesChange] = useEdgesState(layoutedElements.edges);
 
   return (
     <ReactFlow

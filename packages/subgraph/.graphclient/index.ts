@@ -25687,20 +25687,24 @@ export type AllRelevantEntitiesQuery = {
         | "updatedAtTimestamp"
         | "flowRate"
         | "totalAmountDistributedUntilUpdatedAt"
-      >;
+      > & {
+        poolDistributors: Array<
+          Pick<PoolDistributor, "flowRate"> & { account: Pick<Account, "id"> }
+        >;
+      };
     }
   >;
   streams: Array<
     Pick<
       Stream,
       "currentFlowRate" | "updatedAtTimestamp" | "streamedUntilUpdatedAt"
-    >
+    > & { receiver: Pick<Account, "id">; sender: Pick<Account, "id"> }
   >;
 };
 
 export const AllRelevantEntitiesDocument = gql`
   query AllRelevantEntities($account: String!, $token: String!) {
-    poolDistributors(where: { account: $account }) {
+    poolDistributors(where: { account: $account, pool_: {} }) {
       flowRate
       pool {
         id
@@ -25718,6 +25722,12 @@ export const AllRelevantEntitiesDocument = gql`
         updatedAtTimestamp
         flowRate
         totalAmountDistributedUntilUpdatedAt
+        poolDistributors {
+          flowRate
+          account {
+            id
+          }
+        }
       }
     }
     streams(
@@ -25728,6 +25738,12 @@ export const AllRelevantEntitiesDocument = gql`
         ]
       }
     ) {
+      receiver {
+        id
+      }
+      sender {
+        id
+      }
       currentFlowRate
       updatedAtTimestamp
       streamedUntilUpdatedAt
