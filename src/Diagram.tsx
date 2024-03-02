@@ -17,6 +17,33 @@ type Props = {
   edges: Edge[];
 };
 
+function Diagram(props: Props) {
+  const layoutedElements = useMemo(
+    () => getLayoutedElements(props.nodes, props.edges),
+    [props.nodes, props.edges],
+  );
+
+  const [nodes, , onNodesChange] = useNodesState(layoutedElements.nodes);
+  const [edges, , onEdgesChange] = useEdgesState(layoutedElements.edges);
+
+  return (
+    <ReactFlow
+      nodes={nodes}
+      onNodesChange={onNodesChange}
+      edges={edges}
+      onEdgesChange={onEdgesChange}
+      fitView
+    >
+      <Background />
+      <Controls />
+      <MiniMap />
+    </ReactFlow>
+  );
+}
+
+export default Diagram;
+
+// # Dagre stuff
 const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
 
 const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
@@ -44,29 +71,3 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
     edges,
   };
 };
-
-function Diagram(props: Props) {
-  const layoutedElements = useMemo(
-    () => getLayoutedElements(props.nodes, props.edges),
-    [props.nodes, props.edges],
-  );
-
-  const [nodes, , onNodesChange] = useNodesState(layoutedElements.nodes);
-  const [edges, , onEdgesChange] = useEdgesState(layoutedElements.edges);
-
-  return (
-    <ReactFlow
-      nodes={nodes}
-      onNodesChange={onNodesChange}
-      edges={edges}
-      onEdgesChange={onEdgesChange}
-      fitView
-    >
-      <Background />
-      <Controls />
-      <MiniMap />
-    </ReactFlow>
-  );
-}
-
-export default Diagram;

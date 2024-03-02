@@ -1,46 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
-
-import { getBuiltGraphSDK, AllRelevantEntitiesQuery } from "subgraph";
-
-import Diagram from "./Diagram";
-import { Input } from "./routes";
-import { MarkerType, ReactFlowProvider } from "reactflow";
+import { AllRelevantEntitiesQuery } from "subgraph";
+import { MarkerType } from "reactflow";
 import { Address } from "viem";
 import { Node, Edge } from "reactflow";
 import { uniqBy } from "lodash";
+import { shortenHex } from "./lib/shortenHex";
 
-const sdk = getBuiltGraphSDK({
-  url: "https://polygon-mumbai.subgraph.x.superfluid.dev/",
-});
-
-type Props = Input;
-
-function DiagramProvider({ account, token }: Props) {
-  const result = useQuery({
-    // todo, query key based on account and token
-    queryKey: [account, token],
-    queryFn: () =>
-      sdk.AllRelevantEntities({
-        account: account,
-        token: token,
-      }),
-    select: (data) => mapper(account, data),
-  });
-
-  // TODO: null coalesching
-  return (
-    <ReactFlowProvider>
-      {result.data && (
-        <Diagram nodes={result.data.nodes} edges={result.data.edges} />
-      )}
-    </ReactFlowProvider>
-  );
-}
-
-export default DiagramProvider;
-
-// # Utils
-const mapper = (accountAddress: Address, data: AllRelevantEntitiesQuery) => {
+export const dataMapper = (
+  accountAddress: Address,
+  data: AllRelevantEntitiesQuery,
+) => {
   const nodesFromPoolMembers: Node[] = data.poolMembers
     .map((x) => [
       {
@@ -191,14 +159,5 @@ const mapper = (accountAddress: Address, data: AllRelevantEntitiesQuery) => {
   );
 
   // scale flow rates
-
   return { nodes, edges };
 };
-
-export function shortenHex(address: string, chars = 4) {
-  return (
-    address.slice(0, chars + 2) +
-    "..." +
-    address.slice(address.length - chars, address.length)
-  );
-}
