@@ -11,10 +11,11 @@ import Dagre from "@dagrejs/dagre";
 
 import "reactflow/dist/style.css";
 import { useMemo } from "react";
+import { MyEdge, MyNode } from "./dataMapper";
 
 type Props = {
-  nodes: Node[];
-  edges: Edge[];
+  nodes: MyNode[];
+  edges: MyEdge[];
 };
 
 function Diagram(props: Props) {
@@ -46,9 +47,15 @@ export default Diagram;
 // # Dagre stuff
 const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
 
-const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
+const getLayoutedElements = (
+  nodes: MyNode[],
+  edges: MyEdge[],
+): {
+  nodes: Node[];
+  edges: Edge[];
+} => {
   if (!nodes.length) {
-    return { nodes, edges };
+    return { nodes: [], edges };
   }
 
   g.setGraph({
@@ -59,7 +66,7 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
   });
 
   edges.forEach((edge) => g.setEdge(edge.source, edge.target));
-  nodes.forEach((node) => g.setNode(node.id, node as any)); // TODO: fix types
+  nodes.forEach((node) => g.setNode(node.id, node));
 
   Dagre.layout(g);
 

@@ -1,10 +1,10 @@
 import DataProvider from "@/DataProvider";
-import { userInputSchema } from "@/userInputSchema";
+import { urlSchema } from "@/userInputSchema";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   component: Index,
-  validateSearch: userInputSchema,
+  validateSearch: urlSchema,
 });
 
 function Index() {

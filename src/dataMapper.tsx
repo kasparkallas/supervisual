@@ -1,77 +1,60 @@
 import { AllRelevantEntitiesQuery } from "subgraph";
-import { MarkerType } from "reactflow";
 import { Address } from "viem";
 import { Node, Edge } from "reactflow";
 import { uniqBy } from "lodash";
 import { shortenHex } from "./lib/shortenHex";
+import { Label } from "@dagrejs/dagre";
+
+export type MyNode = Omit<
+  Node<{
+    label: string;
+  }>,
+  "position"
+> &
+  Label;
+export type MyEdge = Edge;
 
 export const dataMapper = (
   accountAddress: Address,
   data: AllRelevantEntitiesQuery,
 ) => {
-  const nodesFromPoolMembers: Node[] = data.poolMembers
+  const nodesFromPoolMembers: MyNode[] = data.poolMembers
     .map((x) => [
       {
         id: x.pool.id,
         data: {
           label: shortenHex(x.pool.id),
-          width: 100,
-          height: 100,
-          pool: true,
         },
-        style: {
-          backgroundColor: "orange",
-        },
-        position: { x: 0, y: 0 },
-      } as Node,
-      ...x.pool.poolDistributors.map(
-        (y) =>
-          ({
-            id: y.account.id,
-            data: { label: shortenHex(y.account.id), width: 100, height: 100 },
-            position: { x: 0, y: 0 },
-            style: {
-              backgroundColor: "yellow",
-            },
-          }) as Node,
-      ),
+      },
+      ...x.pool.poolDistributors.map((y) => ({
+        id: y.account.id,
+        data: { label: shortenHex(y.account.id) },
+      })),
     ])
     .flat();
 
-  const nodesFromPoolDistributors: Node[] = data.poolDistributors.map(
-    (x) =>
-      ({
-        id: x.pool.id,
-        data: { label: shortenHex(x.pool.id), width: 100, height: 100 },
-        style: {
-          backgroundColor: "yellow",
-        },
-        position: { x: 0, y: 0 },
-      }) as Node,
+  const nodesFromPoolDistributors: MyNode[] = data.poolDistributors.map(
+    (x) => ({
+      id: x.pool.id,
+      data: { label: shortenHex(x.pool.id) },
+    }),
   );
 
-  const nodesFromStreams: Node[] = data.streams
+  const nodesFromStreams: MyNode[] = data.streams
     .map((x) => [
       {
         id: x.receiver.id,
-        data: { label: shortenHex(x.receiver.id), width: 100, height: 100 },
-        position: { x: 0, y: 0 },
-      } as Node,
+        data: { label: shortenHex(x.receiver.id) },
+      },
       {
         id: x.sender.id,
-        data: { label: shortenHex(x.sender.id), width: 100, height: 100 },
-        position: { x: 0, y: 0 },
-      } as Node,
+        data: { label: shortenHex(x.sender.id) },
+      },
     ])
     .flat();
 
-  const nodes: Node[] = uniqBy(
+  const nodes: MyNode[] = uniqBy(
     [
-      {
-        id: accountAddress,
-        data: { label: shortenHex(accountAddress), width: 100, height: 100 },
-        position: { x: 0, y: 0 },
-      } as Node,
       ...nodesFromPoolMembers,
       ...nodesFromPoolDistributors,
       ...nodesFromStreams,
@@ -79,77 +62,42 @@ export const dataMapper = (
     (x) => x.id,
   );
 
-  const edgesFromPoolDistributors: Edge[] = data.poolDistributors
+  const edgesFromPoolDistributors: MyEdge[] = data.poolDistributors
     .map((x) => [
       {
         id: `${accountAddress}-${x.pool.id}`,
         source: accountAddress,
         target: x.pool.id,
-        animated: true,
-        style: {
-          strokeWidth: 5,
-        },
-        markerEnd: {
-          type: MarkerType.Arrow,
-        },
-        type: "floating",
-      } as Edge,
+      },
     ])
     .flat();
 
-  const edgesFromPoolMembers: Edge[] = data.poolMembers
+  const edgesFromPoolMembers: MyEdge[] = data.poolMembers
     .map((x) => [
       {
         id: `${x.pool.id}-${accountAddress}`,
         source: x.pool.id,
         target: accountAddress,
-        animated: true,
-        style: {
-          strokeWidth: 5,
-        },
-        markerEnd: {
-          type: MarkerType.Arrow,
-        },
-        type: "floating",
-      } as Edge,
-      ...x.pool.poolDistributors.map(
-        (y) =>
-          ({
-            id: `${y.account.id}-${x.pool.id}`,
-            source: y.account.id,
-            target: x.pool.id,
-            animated: true,
-            style: {
-              strokeWidth: 5,
-            },
-            markerEnd: {
-              type: MarkerType.Arrow,
-            },
-            type: "floating",
-          }) as Edge,
-      ),
+      },
+      ...x.pool.poolDistributors.map((y) => ({
+        id: `${y.account.id}-${x.pool.id}`,
+        source: y.account.id,
+        target: x.pool.id,
+      })),
     ])
     .flat();
 
-  const edgesFromStreams: Edge[] = data.streams
+  const edgesFromStreams: MyEdge[] = data.streams
     .map((x) => [
       {
         id: `${x.sender.id}-${x.receiver.id}`,
         source: x.sender.id,
         target: x.receiver.id,
-        animated: true,
-        style: {
-          strokeWidth: 5,
-        },
-        markerEnd: {
-          type: MarkerType.Arrow,
-        },
-        type: "floating",
-      } as Edge,
+      },
     ])
     .flat();
 
-  const edges: Edge[] = uniqBy(
+  const edges: MyEdge[] = uniqBy(
     [
       ...edgesFromPoolMembers,
       ...edgesFromStreams,
@@ -158,6 +106,5 @@ export const dataMapper = (
     (x) => x.id,
   );
 
-  // scale flow rates
   return { nodes, edges };
 };
