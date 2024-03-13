@@ -25658,13 +25658,14 @@ export function getBuiltGraphSDK<TGlobalContext = any, TOperationContext = any>(
   );
 }
 export type AllRelevantEntitiesQueryVariables = Exact<{
-  account: Scalars["String"];
-  token: Scalars["String"];
+  accounts: Array<Scalars["String"]> | Scalars["String"];
+  tokens: Array<Scalars["String"]> | Scalars["String"];
 }>;
 
 export type AllRelevantEntitiesQuery = {
   poolDistributors: Array<
     Pick<PoolDistributor, "flowRate"> & {
+      account: Pick<Account, "id">;
       pool: Pick<
         Pool,
         | "id"
@@ -25681,6 +25682,7 @@ export type AllRelevantEntitiesQuery = {
       | "updatedAtTimestamp"
       | "poolTotalAmountDistributedUntilUpdatedAt"
     > & {
+      account: Pick<Account, "id">;
       pool: Pick<
         Pool,
         | "id"
@@ -25703,9 +25705,14 @@ export type AllRelevantEntitiesQuery = {
 };
 
 export const AllRelevantEntitiesDocument = gql`
-  query AllRelevantEntities($account: String!, $token: String!) {
-    poolDistributors(where: { account: $account, pool_: {} }) {
+  query AllRelevantEntities($accounts: [String!]!, $tokens: [String!]!) {
+    poolDistributors(
+      where: { account_in: $accounts, pool_: { token_in: $tokens } }
+    ) {
       flowRate
+      account {
+        id
+      }
       pool {
         id
         updatedAtTimestamp
@@ -25713,10 +25720,13 @@ export const AllRelevantEntitiesDocument = gql`
         totalAmountDistributedUntilUpdatedAt
       }
     }
-    poolMembers(where: { account: $account }) {
+    poolMembers(where: { account_in: $accounts }) {
       totalAmountReceivedUntilUpdatedAt
       updatedAtTimestamp
       poolTotalAmountDistributedUntilUpdatedAt
+      account {
+        id
+      }
       pool {
         id
         updatedAtTimestamp
@@ -25733,8 +25743,8 @@ export const AllRelevantEntitiesDocument = gql`
     streams(
       where: {
         or: [
-          { receiver: $account, token: $token }
-          { sender: $account, token: $token }
+          { receiver_in: $accounts, token_in: $tokens }
+          { sender_in: $accounts, token_in: $tokens }
         ]
       }
     ) {

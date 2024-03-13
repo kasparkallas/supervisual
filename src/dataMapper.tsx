@@ -15,7 +15,7 @@ export type MyNode = Omit<
 export type MyEdge = Edge;
 
 export const dataMapper = (
-  accountAddress: Address,
+  // accountAddress: Address,
   data: AllRelevantEntitiesQuery,
 ) => {
   const nodesFromPoolMembers: MyNode[] = data.poolMembers
@@ -65,8 +65,8 @@ export const dataMapper = (
   const edgesFromPoolDistributors: MyEdge[] = data.poolDistributors
     .map((x) => [
       {
-        id: `${accountAddress}-${x.pool.id}`,
-        source: accountAddress,
+        id: `${x.account.id}-${x.pool.id}`,
+        source: x.account.id,
         target: x.pool.id,
       },
     ])
@@ -75,9 +75,9 @@ export const dataMapper = (
   const edgesFromPoolMembers: MyEdge[] = data.poolMembers
     .map((x) => [
       {
-        id: `${x.pool.id}-${accountAddress}`,
+        id: `${x.pool.id}-${x.account.id}`,
         source: x.pool.id,
-        target: accountAddress,
+        target: x.account.id,
       },
       ...x.pool.poolDistributors.map((y) => ({
         id: `${y.account.id}-${x.pool.id}`,

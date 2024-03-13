@@ -9,25 +9,14 @@ export const ethereumAddressSchema = z
     message: "Invalid Ethereum address",
   });
 
-export const urlSchema = z.object({
-  token: ethereumAddressSchema.or(z.literal("")).default(""),
-  accounts: ethereumAddressSchema
-    .transform((x) => [x])
-    .or(ethereumAddressSchema.array())
-    .default([]),
+export const ethereumAddressCollectionSchema = ethereumAddressSchema
+  .transform((x) => [x])
+  .or(ethereumAddressSchema.array())
+  .default([]);
+
+export const diagramInputSchema = z.object({
+  tokens: ethereumAddressCollectionSchema,
+  accounts: ethereumAddressCollectionSchema,
 });
 
-export const formSchema = z.object({
-  token: ethereumAddressSchema,
-  accounts: z
-    .array(
-      z.object({
-        value: ethereumAddressSchema,
-      }),
-    )
-    .transform((x) => x.filter((y) => y.value).map((y) => y.value)),
-});
-
-export type FormInput = z.input<typeof formSchema>;
-export type FormOutput = z.output<typeof formSchema>;
-export type Config = z.output<typeof urlSchema>;
+export type DiagramInput = z.output<typeof diagramInputSchema>;

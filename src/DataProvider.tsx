@@ -12,8 +12,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-import { useQueries } from "@tanstack/react-query";
-import { Config } from "./userInputSchema";
+import { useQueries, useQuery } from "@tanstack/react-query";
+import { DiagramInput } from "./userInputSchema";
 import { Button } from "./components/ui/button";
 import { DataForm } from "./DataForm";
 import { uniqBy } from "lodash";
@@ -22,52 +22,63 @@ const graphSDK = getBuiltGraphSDK({
   url: "https://optimism-mainnet.subgraph.x.superfluid.dev/",
 });
 
-type Props = Config;
+type Props = DiagramInput;
 
-function DataProvider({ accounts, token }: Props) {
-  const hasEnoughInput = accounts.length && token;
-
-  const queryResults = useQueries({
-    queries: hasEnoughInput
-      ? accounts.map((account) => ({
-          queryKey: [account, token],
-          queryFn: () =>
-            graphSDK.AllRelevantEntities({
-              account: account,
-              token: token,
-            }),
-        }))
-      : [],
+function DataProvider({ tokens, accounts }: Props) {
+  const hasEnoughInput = Boolean(accounts.length) && Boolean(tokens.length);
+  const { data } = useQuery({
+    queryKey: ["tokens", tokens, "accounts", accounts],
+    queryFn: () =>
+      graphSDK.AllRelevantEntities({
+        accounts: accounts,
+        tokens: tokens,
+      }),
+    enabled: hasEnoughInput,
   });
 
-  console.log(queryResults);
+  // const queryResults = useQueries({
+  //   queries: hasEnoughInput
+  //     ? accounts.map((account) => ({
+  //       queryKey: [account, token],
+  //       queryFn: () =>
+  //         graphSDK.AllRelevantEntities({
+  //           account: account,
+  //           token: token,
+  //         }),
+  //     }))
+  //     : [],
+  // });
+
+  // console.log(queryResults);
 
   // todo: clean-up
-  const results = !queryResults.some((x) => !x.data)
-    ? queryResults
-        .map((x) => x.data)
-        .flat()
-        .map((x) => dataMapper(accounts[0], x!))
-        .reduce(
-          (acc, curr) => {
-            return {
-              nodes: uniqBy([...acc.nodes, ...curr.nodes], (x) => x.id),
-              edges: uniqBy([...acc.edges, ...curr.edges], (x) => x.id),
-            };
-          },
-          { nodes: [], edges: [] },
-        )
-    : undefined;
+  const results = data ? dataMapper(data) : undefined;
+
+  // !queryResults.some((x) => !x.data)
+  //   ? queryResults
+  //     .map((x) => x.data)
+  //     .flat()
+  //     .map((x) => dataMapper(accounts[0], x!))
+  //     .reduce(
+  //       (acc, curr) => {
+  //         return {
+  //           nodes: uniqBy([...acc.nodes, ...curr.nodes], (x) => x.id),
+  //           edges: uniqBy([...acc.edges, ...curr.edges], (x) => x.id),
+  //         };
+  //       },
+  //       { nodes: [], edges: [] },
+  //     )
+  //   : undefined;
 
   // todo: handle loading better
 
   return (
     <ReactFlowProvider>
-      <Panel position="top-right">
+      <Panel position="top-left">
         <Dialog>
           <DialogTrigger asChild>
             <Button className="scale-95 rounded-full shadow-lg shadow-neutral-400 transition-transform hover:scale-100">
-              Configure
+              Select Tokens & Accounts
             </Button>
           </DialogTrigger>
           <FormDialogContent />
@@ -86,7 +97,7 @@ const FormDialogContent = () => {
   return (
     <DialogContent className="sm:max-w-[425px]">
       <DialogHeader>
-        <DialogTitle>Select Token & Accounts</DialogTitle>
+        <DialogTitle>Select Tokens & Accounts</DialogTitle>
         <DialogDescription>
           Make changes to your profile here. Click save when you're done.
         </DialogDescription>

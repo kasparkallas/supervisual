@@ -1,6 +1,11 @@
-query AllRelevantEntities($account: String!, $token: String!) {
-  poolDistributors(where: { account: $account, pool_: {} }) {
+query AllRelevantEntities($accounts: [String!]!, $tokens: [String!]!) {
+  poolDistributors(
+    where: { account_in: $accounts, pool_: { token_in: $tokens } }
+  ) {
     flowRate
+    account {
+      id
+    }
     pool {
       id
       updatedAtTimestamp
@@ -8,10 +13,13 @@ query AllRelevantEntities($account: String!, $token: String!) {
       totalAmountDistributedUntilUpdatedAt
     }
   }
-  poolMembers(where: { account: $account }) {
+  poolMembers(where: { account_in: $accounts }) {
     totalAmountReceivedUntilUpdatedAt
     updatedAtTimestamp
     poolTotalAmountDistributedUntilUpdatedAt
+    account {
+      id
+    }
     pool {
       id
       updatedAtTimestamp
@@ -28,8 +36,8 @@ query AllRelevantEntities($account: String!, $token: String!) {
   streams(
     where: {
       or: [
-        { receiver: $account, token: $token }
-        { sender: $account, token: $token }
+        { receiver_in: $accounts, token_in: $tokens }
+        { sender_in: $accounts, token_in: $tokens }
       ]
     }
   ) {

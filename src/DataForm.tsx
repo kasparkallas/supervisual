@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
-import { FormInput, FormOutput, formSchema } from "./userInputSchema";
 import { Button } from "./components/ui/button";
 import {
   FormField,
@@ -13,6 +12,35 @@ import {
 } from "./components/ui/form";
 import { Input } from "./components/ui/input";
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
+import { z } from "zod";
+import {
+  ethereumAddressCollectionSchema,
+  ethereumAddressSchema,
+} from "./userInputSchema";
+import { Address } from "viem";
+
+const ethereumAddressFieldArraySchema = z
+  .array(
+    z.object({
+      value: z.string().trim().optional(),
+    }),
+  )
+  .transform((x) => x.filter((y) => y.value).map((y) => y.value))
+  .pipe(ethereumAddressCollectionSchema);
+
+const formSchema = z.object({
+  tokens: ethereumAddressFieldArraySchema,
+  accounts: ethereumAddressFieldArraySchema,
+});
+
+export type FormInput = z.input<typeof formSchema>;
+export type FormOutput = z.output<typeof formSchema>;
+
+const mapAddressesIntoFieldArray = (addresses: Address[]) => {
+  return addresses.length
+    ? addresses.map((x) => ({ value: x }))
+    : [{ value: "" }];
+};
 
 const route = getRouteApi("/");
 
@@ -23,14 +51,17 @@ export function DataForm() {
   const form = useForm<FormInput, any, FormOutput>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      token: search.token,
-      accounts: search.accounts.length
-        ? search.accounts.map((x) => ({ value: x }))
-        : [{ value: "" }],
+      tokens: mapAddressesIntoFieldArray(search.tokens),
+      accounts: mapAddressesIntoFieldArray(search.accounts),
     },
   });
 
-  const { fields, append } = useFieldArray({
+  const tokensFieldArray = useFieldArray({
+    name: "accounts",
+    control: form.control,
+  });
+
+  const accountsFieldArray = useFieldArray({
     name: "accounts",
     control: form.control,
   });
@@ -41,8 +72,6 @@ export function DataForm() {
     });
   }
 
-  console.log(form.getValues());
-
   return (
     <Form {...form}>
       <form
@@ -51,28 +80,14 @@ export function DataForm() {
         })}
         className="space-y-8"
       >
-        <FormField
-          control={form.control}
-          name="token"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Token</FormLabel>
-              <FormDescription>The token...</FormDescription>
-              <FormControl>
-                <Input placeholder="0x..." {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         <div>
-          <FormLabel>Accounts</FormLabel>
-          <FormDescription>The accounts...</FormDescription>
-          {fields.map((field, index) => (
+          <FormLabel>Tokens</FormLabel>
+          {/* <FormDescription>The tokens...</FormDescription> */}
+          {tokensFieldArray.fields.map((field, index) => (
             <FormField
               control={form.control}
               key={field.id}
-              name={`accounts.${index}.value`}
+              name={`tokens.${index}.value`}
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -88,12 +103,42 @@ export function DataForm() {
             variant="outline"
             size="sm"
             className="mt-2"
-            onClick={() => append({ value: "" })}
+            onClick={() => tokensFieldArray.append({ value: "" })}
           >
-            Add account
+            Add more
           </Button>
         </div>
-        <Button type="submit">Submit</Button>
+        <div>
+          <FormLabel>Accounts</FormLabel>
+          {/* <FormDescription>The accounts...</FormDescription> */}
+          <div className="flex flex-col gap-1">
+            {accountsFieldArray.fields.map((field, index) => (
+              <FormField
+                control={form.control}
+                key={field.id}
+                name={`accounts.${index}.value`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input placeholder="0x..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ))}
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="mt-2"
+            onClick={() => accountsFieldArray.append({ value: "" })}
+          >
+            Add more
+          </Button>
+        </div>
+        <Button type="submit">Confirm</Button>
       </form>
     </Form>
   );
