@@ -3,13 +3,6 @@ import { Handle, Position } from "reactflow";
 import { MyNode } from "./dataMapper";
 import { cn } from "./lib/utils";
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-
 function CustomNode({ data }: MyNode) {
   return (
     <div
@@ -20,7 +13,13 @@ function CustomNode({ data }: MyNode) {
     >
       <div className="flex">
         <div className="ml-2">
-          <div className="font-mono text-lg" title={data?.address}>
+          <div
+            className={cn(
+              "font-mono text-lg",
+              data.isSelected ? "font-extrabold" : "",
+            )}
+            title={data?.address}
+          >
             {data?.label}
           </div>
         </div>

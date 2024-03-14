@@ -9,6 +9,7 @@ export type MyNode = Omit<
   Node<{
     address: string;
     isPool?: boolean;
+    isSelected?: boolean;
     label?: string; // todo: move this
   }>,
   "position"

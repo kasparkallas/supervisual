@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { DiagramInput } from "./userInputSchema";
 import { Button } from "./components/ui/button";
 import { DataForm } from "./DataForm";
@@ -69,10 +69,14 @@ function DataProvider({ chain, tokens, accounts }: Props) {
         return {
           nodes: uniqNodes.map((node) => {
             const address = getAddress(node.data.address);
+            const isSelected = accounts.includes(
+              address.toLowerCase() as Address,
+            );
             return {
               ...node,
               data: {
                 ...node.data,
+                isSelected,
                 address,
                 label: shortenHex(address),
               },
