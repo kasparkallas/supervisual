@@ -7,7 +7,9 @@ import { Label } from "@dagrejs/dagre";
 
 export type MyNode = Omit<
   Node<{
-    label: string;
+    address: string;
+    isPool?: boolean;
+    label?: string; // todo: move this
   }>,
   "position"
 > &
@@ -23,12 +25,13 @@ export const dataMapper = (
       {
         id: x.pool.id,
         data: {
-          label: shortenHex(x.pool.id),
+          address: x.pool.id,
+          isPool: true,
         },
       },
       ...x.pool.poolDistributors.map((y) => ({
         id: y.account.id,
-        data: { label: shortenHex(y.account.id) },
+        data: { address: y.account.id },
       })),
     ])
     .flat();
@@ -36,7 +39,7 @@ export const dataMapper = (
   const nodesFromPoolDistributors: MyNode[] = data.poolDistributors.map(
     (x) => ({
       id: x.pool.id,
-      data: { label: shortenHex(x.pool.id) },
+      data: { address: x.pool.id, isPool: true },
     }),
   );
 
@@ -44,11 +47,11 @@ export const dataMapper = (
     .map((x) => [
       {
         id: x.receiver.id,
-        data: { label: shortenHex(x.receiver.id) },
+        data: { address: x.receiver.id },
       },
       {
         id: x.sender.id,
-        data: { label: shortenHex(x.sender.id) },
+        data: { address: x.sender.id },
       },
     ])
     .flat();

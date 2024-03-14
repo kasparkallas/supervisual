@@ -17,6 +17,8 @@ import { DiagramInput } from "./userInputSchema";
 import { Button } from "./components/ui/button";
 import { DataForm } from "./DataForm";
 import { uniqBy } from "lodash";
+import { shortenHex } from "./lib/shortenHex";
+import { Address, getAddress } from "viem";
 
 const graphSDK = getBuiltGraphSDK({
   url: "https://optimism-mainnet.subgraph.x.superfluid.dev/",
@@ -52,7 +54,31 @@ function DataProvider({ tokens, accounts }: Props) {
   // console.log(queryResults);
 
   // todo: clean-up
-  const results = data ? dataMapper(data) : undefined;
+  const results = data
+    ? (() => {
+        const { nodes, edges } = dataMapper(data);
+        const uniqNodes = uniqBy(nodes, (x) => x.id);
+        const uniqEdges = uniqBy(edges, (x) => x.id);
+        return {
+          nodes: uniqNodes.map((node) => {
+            const address = getAddress(node.data.address);
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                address,
+                label: shortenHex(address),
+              },
+              type: "custom",
+            };
+          }),
+          edges: uniqEdges.map((x) => ({
+            ...x,
+            animated: true,
+          })),
+        };
+      })()
+    : undefined;
 
   // !queryResults.some((x) => !x.data)
   //   ? queryResults
@@ -91,15 +117,13 @@ function DataProvider({ tokens, accounts }: Props) {
 
 export default DataProvider;
 
-// TODO: extract
-
 const FormDialogContent = () => {
   return (
     <DialogContent className="sm:max-w-[425px]">
       <DialogHeader>
         <DialogTitle>Select Tokens & Accounts</DialogTitle>
         <DialogDescription>
-          Make changes to your profile here. Click save when you're done.
+          The tokens and accounts you select will be used for the diagram.
         </DialogDescription>
       </DialogHeader>
       <DataForm />

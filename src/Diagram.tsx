@@ -18,6 +18,12 @@ type Props = {
   edges: MyEdge[];
 };
 
+import CustomNode from "./CustomNode";
+
+const nodeTypes = {
+  custom: CustomNode,
+};
+
 function Diagram(props: Props) {
   const layoutedElements = useMemo(
     () => getLayoutedElements(props.nodes, props.edges),
@@ -33,11 +39,12 @@ function Diagram(props: Props) {
       onNodesChange={onNodesChange}
       edges={edges}
       onEdgesChange={onEdgesChange}
+      nodeTypes={nodeTypes}
       fitView
     >
       <Background />
       <Controls />
-      <MiniMap />
+      {/* <MiniMap /> */}
     </ReactFlow>
   );
 }

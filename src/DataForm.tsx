@@ -57,7 +57,7 @@ export function DataForm() {
   });
 
   const tokensFieldArray = useFieldArray({
-    name: "accounts",
+    name: "tokens",
     control: form.control,
   });
 
@@ -83,21 +83,23 @@ export function DataForm() {
         <div>
           <FormLabel>Tokens</FormLabel>
           {/* <FormDescription>The tokens...</FormDescription> */}
-          {tokensFieldArray.fields.map((field, index) => (
-            <FormField
-              control={form.control}
-              key={field.id}
-              name={`tokens.${index}.value`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input placeholder="0x..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          ))}
+          <div className="flex flex-col gap-1">
+            {tokensFieldArray.fields.map((field, index) => (
+              <FormField
+                control={form.control}
+                key={field.id}
+                name={`tokens.${index}.value`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input placeholder="0x..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ))}
+          </div>
           <Button
             type="button"
             variant="outline"
