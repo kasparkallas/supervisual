@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { isAddress } from "viem";
+import { uniq } from "lodash";
 
 export const ethereumAddressSchema = z
   .string()
@@ -12,9 +13,11 @@ export const ethereumAddressSchema = z
 export const ethereumAddressCollectionSchema = ethereumAddressSchema
   .transform((x) => [x])
   .or(ethereumAddressSchema.array())
+  .transform((x) => uniq(x))
   .default([]);
 
 export const diagramInputSchema = z.object({
+  chain: z.coerce.number().default(10),
   tokens: ethereumAddressCollectionSchema,
   accounts: ethereumAddressCollectionSchema,
 });

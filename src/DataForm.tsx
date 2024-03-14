@@ -6,18 +6,22 @@ import {
   FormItem,
   FormLabel,
   FormControl,
-  FormDescription,
   FormMessage,
   Form,
 } from "./components/ui/form";
 import { Input } from "./components/ui/input";
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
-import {
-  ethereumAddressCollectionSchema,
-  ethereumAddressSchema,
-} from "./userInputSchema";
+import { ethereumAddressCollectionSchema } from "./userInputSchema";
 import { Address } from "viem";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "./components/ui/select";
+import sfMeta from "@superfluid-finance/metadata";
 
 const ethereumAddressFieldArraySchema = z
   .array(
@@ -29,6 +33,7 @@ const ethereumAddressFieldArraySchema = z
   .pipe(ethereumAddressCollectionSchema);
 
 const formSchema = z.object({
+  chain: z.string().default("10").pipe(z.coerce.number()),
   tokens: ethereumAddressFieldArraySchema,
   accounts: ethereumAddressFieldArraySchema,
 });
@@ -51,6 +56,7 @@ export function DataForm() {
   const form = useForm<FormInput, any, FormOutput>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      chain: search.chain.toString(),
       tokens: mapAddressesIntoFieldArray(search.tokens),
       accounts: mapAddressesIntoFieldArray(search.accounts),
     },
@@ -76,10 +82,44 @@ export function DataForm() {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit, (e) => {
+          // todo: handle better
           console.error(e);
         })}
         className="space-y-8"
       >
+        <FormField
+          control={form.control}
+          name="chain"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Network</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value?.toString()}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select network" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {
+                    // todo: optimize
+                    sfMeta.networks.map((network) => (
+                      <SelectItem
+                        key={network.chainId.toString()}
+                        value={network.chainId.toString()}
+                      >
+                        {network.humanReadableName}
+                      </SelectItem>
+                    ))
+                  }
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <div>
           <FormLabel>Tokens</FormLabel>
           {/* <FormDescription>The tokens...</FormDescription> */}
@@ -140,7 +180,9 @@ export function DataForm() {
             Add more
           </Button>
         </div>
-        <Button type="submit">Confirm</Button>
+        <Button type="submit" className="float-end">
+          Save selection
+        </Button>
       </form>
     </Form>
   );

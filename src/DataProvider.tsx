@@ -16,22 +16,29 @@ import { useQueries, useQuery } from "@tanstack/react-query";
 import { DiagramInput } from "./userInputSchema";
 import { Button } from "./components/ui/button";
 import { DataForm } from "./DataForm";
-import { uniqBy } from "lodash";
+import { memoize, uniqBy } from "lodash";
 import { shortenHex } from "./lib/shortenHex";
 import { Address, getAddress } from "viem";
+import sfMeta from "@superfluid-finance/metadata";
 
-const graphSDK = getBuiltGraphSDK({
-  url: "https://optimism-mainnet.subgraph.x.superfluid.dev/",
+const graphSDK = memoize((chain: number) => {
+  const metadata = sfMeta.getNetworkByChainId(chain);
+  if (!metadata) {
+    throw new Error("Unsupported chain");
+  }
+  return getBuiltGraphSDK({
+    url: `https://${metadata.name}.subgraph.x.superfluid.dev/`,
+  });
 });
 
 type Props = DiagramInput;
 
-function DataProvider({ tokens, accounts }: Props) {
+function DataProvider({ chain, tokens, accounts }: Props) {
   const hasEnoughInput = Boolean(accounts.length) && Boolean(tokens.length);
   const { data } = useQuery({
-    queryKey: ["tokens", tokens, "accounts", accounts],
+    queryKey: ["chain", chain, "tokens", tokens, "accounts", accounts],
     queryFn: () =>
-      graphSDK.AllRelevantEntities({
+      graphSDK(chain).AllRelevantEntities({
         accounts: accounts,
         tokens: tokens,
       }),
