@@ -21,10 +21,20 @@ function CustomNode({ data }: MyNode) {
   return (
     <div
       className={cn(
-        "rounded-md border-2 border-stone-600 px-4 py-2 shadow-md",
+        "rounded-full border-2 border-stone-600 px-4 py-2 shadow-md",
         data.isPool ? "bg-amber-100" : "bg-white",
       )}
     >
+      <Handle
+        className="invisible absolute inset-1/2 -translate-x-1/2 -translate-y-1/2 transform"
+        type="target"
+        position={Position.Top}
+      />
+      <Handle
+        className="invisible absolute inset-1/2 -translate-x-1/2 -translate-y-1/2 transform"
+        type="source"
+        position={Position.Bottom}
+      />
       <div className="flex">
         <div className="ml-2">
           <div
@@ -87,8 +97,6 @@ function CustomNode({ data }: MyNode) {
           </div>
         </div>
       </div>
-      <Handle type="target" position={Position.Top} />
-      <Handle type="source" position={Position.Bottom} />
     </div>
   );
 }

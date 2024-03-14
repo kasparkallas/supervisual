@@ -6,12 +6,18 @@ import ReactFlow, {
   Edge,
   Controls,
   MiniMap,
+  useReactFlow,
+  ProOptions,
+  NodeOrigin,
+  OnConnect,
+  addEdge,
 } from "reactflow";
-import Dagre from "@dagrejs/dagre";
+import useForceLayout from "./useForceLayout";
 
 import "reactflow/dist/style.css";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { MyEdge, MyNode } from "./dataMapper";
+import Dagre from "@dagrejs/dagre";
 
 type Props = {
   nodes: MyNode[];
@@ -24,23 +30,49 @@ const nodeTypes = {
   custom: CustomNode,
 };
 
+// const nodeOrigin: NodeOrigin = [0.5, 0.5]; // what is this?
+
+const proOptions: ProOptions = { account: "paid-pro", hideAttribution: true };
+
 function Diagram(props: Props) {
+  const { screenToFlowPosition } = useReactFlow();
+
   const layoutedElements = useMemo(
     () => getLayoutedElements(props.nodes, props.edges),
     [props.nodes, props.edges],
   );
 
-  const [nodes, , onNodesChange] = useNodesState(layoutedElements.nodes);
-  const [edges, , onEdgesChange] = useEdgesState(layoutedElements.edges);
+  useForceLayout();
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(
+    layoutedElements.nodes,
+  ); // todo: fix types
+  const [edges, setEdges, onEdgesChange] = useEdgesState(
+    layoutedElements.edges,
+  );
+
+  const onConnect: OnConnect = useCallback(
+    (params) => setEdges((eds) => addEdge(params, eds)),
+    [setEdges],
+  );
 
   return (
     <ReactFlow
       nodes={nodes}
-      onNodesChange={onNodesChange}
       edges={edges}
+      onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
+      proOptions={proOptions}
+      onConnect={onConnect}
+      // onPaneClick={onPaneClick}
+      // nodeOrigin={nodeOrigin}
       nodeTypes={nodeTypes}
       fitView
+      // defaultViewport={{
+      //   x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0,
+      //   y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0,
+      //   zoom: 0,
+      // }}
     >
       <Background />
       <Controls />
@@ -67,8 +99,8 @@ const getLayoutedElements = (
 
   g.setGraph({
     rankdir: "TB",
-    nodesep: 250,
-    ranksep: 250,
+    nodesep: 200,
+    ranksep: 300,
     ranker: "longest-path",
   });
 

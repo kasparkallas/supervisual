@@ -82,6 +82,7 @@ function DataProvider({ chain, tokens, accounts }: Props) {
                 label: shortenHex(address),
               },
               type: "custom",
+              position: { x: 0, y: 0 },
             };
           }),
           edges: uniqEdges.map((x) => ({
