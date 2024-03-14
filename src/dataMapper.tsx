@@ -7,6 +7,7 @@ import { Label } from "@dagrejs/dagre";
 
 export type MyNode = Omit<
   Node<{
+    chain?: number; // todo: clean-up
     address: string;
     isPool?: boolean;
     isSelected?: boolean;

@@ -78,6 +78,7 @@ function DataProvider({ chain, tokens, accounts }: Props) {
                 ...node.data,
                 isSelected,
                 address,
+                chain,
                 label: shortenHex(address),
               },
               type: "custom",
