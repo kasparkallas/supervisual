@@ -9,7 +9,7 @@ import {
 } from "./components/ui/hover-card";
 import { Button } from "./components/ui/button";
 import copy from "copy-text-to-clipboard";
-import { Link, getRouteApi, useNavigate } from "@tanstack/react-router";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { Address } from "viem";
 
 const route = getRouteApi("/");
@@ -63,7 +63,8 @@ function CustomNode({ data }: MyNode) {
                           search: {
                             ...search,
                             accounts: search.accounts.filter(
-                              (x) => x !== data.address.toLowerCase(),
+                              (x) =>
+                                x.toLowerCase() !== data.address.toLowerCase(),
                             ), // todo: clean-up
                           },
                         });

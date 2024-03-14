@@ -36,7 +36,7 @@ type Props = DiagramInput;
 function DataProvider({ chain, tokens, accounts }: Props) {
   const hasEnoughInput = Boolean(accounts.length) && Boolean(tokens.length);
   const { data } = useQuery({
-    queryKey: ["chain", chain, "tokens", tokens, "accounts", accounts],
+    queryKey: ["chain", chain, "tokens", ...tokens, "accounts", ...accounts],
     queryFn: () =>
       graphSDK(chain).AllRelevantEntities({
         accounts: accounts,
@@ -69,9 +69,9 @@ function DataProvider({ chain, tokens, accounts }: Props) {
         return {
           nodes: uniqNodes.map((node) => {
             const address = getAddress(node.data.address);
-            const isSelected = accounts.includes(
-              address.toLowerCase() as Address,
-            );
+            const isSelected = accounts
+              .map((x) => x.toLowerCase())
+              .includes(address.toLowerCase() as Address);
             return {
               ...node,
               data: {
