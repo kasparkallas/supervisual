@@ -25665,42 +25665,29 @@ export type AllRelevantEntitiesQueryVariables = Exact<{
 export type AllRelevantEntitiesQuery = {
   poolDistributors: Array<
     Pick<PoolDistributor, "flowRate"> & {
-      account: Pick<Account, "id">;
-      pool: Pick<
-        Pool,
-        | "id"
-        | "updatedAtTimestamp"
-        | "flowRate"
-        | "totalAmountDistributedUntilUpdatedAt"
-      >;
+      account: Pick<Account, "id" | "isSuperApp">;
+      pool: Pick<Pool, "id"> & { token: Pick<Token, "id"> };
     }
   >;
   poolMembers: Array<
-    Pick<
-      PoolMember,
-      | "totalAmountReceivedUntilUpdatedAt"
-      | "updatedAtTimestamp"
-      | "poolTotalAmountDistributedUntilUpdatedAt"
-    > & {
-      account: Pick<Account, "id">;
-      pool: Pick<
-        Pool,
-        | "id"
-        | "updatedAtTimestamp"
-        | "flowRate"
-        | "totalAmountDistributedUntilUpdatedAt"
-      > & {
+    Pick<PoolMember, "units"> & {
+      account: Pick<Account, "id" | "isSuperApp">;
+      pool: Pick<Pool, "id" | "flowRate" | "totalUnits"> & {
         poolDistributors: Array<
-          Pick<PoolDistributor, "flowRate"> & { account: Pick<Account, "id"> }
+          Pick<PoolDistributor, "flowRate"> & {
+            account: Pick<Account, "id" | "isSuperApp">;
+          }
         >;
+        token: Pick<Token, "id">;
       };
     }
   >;
   streams: Array<
-    Pick<
-      Stream,
-      "currentFlowRate" | "updatedAtTimestamp" | "streamedUntilUpdatedAt"
-    > & { receiver: Pick<Account, "id">; sender: Pick<Account, "id"> }
+    Pick<Stream, "currentFlowRate"> & {
+      receiver: Pick<Account, "id" | "isSuperApp">;
+      sender: Pick<Account, "id" | "isSuperApp">;
+      token: Pick<Token, "id">;
+    }
   >;
 };
 
@@ -25712,31 +25699,34 @@ export const AllRelevantEntitiesDocument = gql`
       flowRate
       account {
         id
+        isSuperApp
       }
       pool {
         id
-        updatedAtTimestamp
-        flowRate
-        totalAmountDistributedUntilUpdatedAt
+        token {
+          id
+        }
       }
     }
     poolMembers(where: { account_in: $accounts }) {
-      totalAmountReceivedUntilUpdatedAt
-      updatedAtTimestamp
-      poolTotalAmountDistributedUntilUpdatedAt
+      units
       account {
         id
+        isSuperApp
       }
       pool {
         id
-        updatedAtTimestamp
         flowRate
-        totalAmountDistributedUntilUpdatedAt
+        totalUnits
         poolDistributors {
           flowRate
           account {
             id
+            isSuperApp
           }
+        }
+        token {
+          id
         }
       }
     }
@@ -25750,13 +25740,16 @@ export const AllRelevantEntitiesDocument = gql`
     ) {
       receiver {
         id
+        isSuperApp
       }
       sender {
         id
+        isSuperApp
+      }
+      token {
+        id
       }
       currentFlowRate
-      updatedAtTimestamp
-      streamedUntilUpdatedAt
     }
   }
 ` as unknown as DocumentNode<

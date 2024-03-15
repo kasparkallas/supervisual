@@ -68,18 +68,16 @@ function DataProvider({ chain, tokens, accounts }: Props) {
         const uniqEdges = uniqBy(edges, (x) => x.id);
         return {
           nodes: uniqNodes.map((node) => {
-            const address = getAddress(node.data.address);
             const isSelected = accounts
               .map((x) => x.toLowerCase())
-              .includes(address.toLowerCase() as Address);
+              .includes(node.data.address.toLowerCase() as Address);
             return {
               ...node,
               data: {
                 ...node.data,
                 isSelected,
-                address,
                 chain,
-                label: shortenHex(address),
+                label: shortenHex(node.data.address),
               },
               type: "custom",
               position: { x: 0, y: 0 },

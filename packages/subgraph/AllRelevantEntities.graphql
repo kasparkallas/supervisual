@@ -5,31 +5,34 @@ query AllRelevantEntities($accounts: [String!]!, $tokens: [String!]!) {
     flowRate
     account {
       id
+      isSuperApp
     }
     pool {
       id
-      updatedAtTimestamp
-      flowRate
-      totalAmountDistributedUntilUpdatedAt
+      token {
+        id
+      }
     }
   }
   poolMembers(where: { account_in: $accounts }) {
-    totalAmountReceivedUntilUpdatedAt
-    updatedAtTimestamp
-    poolTotalAmountDistributedUntilUpdatedAt
+    units
     account {
       id
+      isSuperApp
     }
     pool {
       id
-      updatedAtTimestamp
       flowRate
-      totalAmountDistributedUntilUpdatedAt
+      totalUnits
       poolDistributors {
         flowRate
         account {
           id
+          isSuperApp
         }
+      }
+      token {
+        id
       }
     }
   }
@@ -43,12 +46,15 @@ query AllRelevantEntities($accounts: [String!]!, $tokens: [String!]!) {
   ) {
     receiver {
       id
+      isSuperApp
     }
     sender {
       id
+      isSuperApp
+    }
+    token {
+      id
     }
     currentFlowRate
-    updatedAtTimestamp
-    streamedUntilUpdatedAt
   }
 }
