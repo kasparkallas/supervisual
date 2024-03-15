@@ -25,7 +25,11 @@ function CustomNode({ data }: MyNode) {
         <div
           className={cn(
             "rounded-full border-2 border-stone-600 px-4 py-2 shadow-md",
-            data.isPool ? "bg-amber-100" : "bg-white",
+            data.isPool
+              ? "bg-amber-100"
+              : data.isSuperApp
+                ? "bg-pink-100"
+                : "bg-white",
           )}
         >
           <Handle
