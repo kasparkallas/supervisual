@@ -24,7 +24,7 @@ function CustomNode({ data }: MyNode) {
       <HoverCardTrigger>
         <div
           className={cn(
-            "rounded-full border-2 border-stone-600 px-4 py-2 shadow-md",
+            "rounded-xl border-2 border-stone-600 px-4 py-2 shadow-md",
             data.isPool
               ? "bg-amber-100"
               : data.isSuperApp
@@ -33,12 +33,14 @@ function CustomNode({ data }: MyNode) {
           )}
         >
           <Handle
-            className="invisible absolute inset-1/2 -translate-x-1/2 -translate-y-1/2 transform"
+            className="invisible"
+            // className="invisible absolute inset-1/2 -translate-x-1/2 -translate-y-1/2 transform"
             type="target"
             position={Position.Top}
           />
           <Handle
-            className="invisible absolute inset-1/2 -translate-x-1/2 -translate-y-1/2 transform"
+            className="invisible"
+            // className="invisible absolute inset-1/2 -translate-x-1/2 -translate-y-1/2 transform"
             type="source"
             position={Position.Bottom}
           />

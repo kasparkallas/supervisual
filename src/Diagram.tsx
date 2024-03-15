@@ -26,9 +26,15 @@ type Props = {
 
 import CustomNode from "./CustomNode";
 import dagreLayout from "./auto-layout/algorithms/dagre";
+import FloatingEdge from "./floating-edge/FloatingEdge";
+import FloatingConnectionLine from "./floating-edge/FloatingConnectionLine";
 
 const nodeTypes = {
   custom: CustomNode,
+};
+
+const edgeTypes = {
+  floating: FloatingEdge as any, // todo: types
 };
 
 // const nodeOrigin: NodeOrigin = [0.5, 0.5]; // what is this?
@@ -74,6 +80,8 @@ function Diagram(props: Props) {
       // nodeOrigin={nodeOrigin}
       nodeTypes={nodeTypes}
       fitView
+      edgeTypes={edgeTypes}
+      connectionLineComponent={FloatingConnectionLine as any} // todo: types
       // defaultViewport={{
       //   x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0,
       //   y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0,

@@ -1,7 +1,7 @@
 import { getBuiltGraphSDK } from "subgraph";
 
 import Diagram from "./Diagram";
-import { Panel, ReactFlowProvider } from "reactflow";
+import { MarkerType, Panel, ReactFlowProvider } from "reactflow";
 import { dataMapper } from "./dataMapper";
 import {
   Dialog,
@@ -86,6 +86,15 @@ function DataProvider({ chain, tokens, accounts }: Props) {
           edges: uniqEdges.map((x) => ({
             ...x,
             animated: true,
+            type: "floating",
+            style: {
+              strokeWidth: 3,
+            },
+            // markerEnd: {
+            //   type: MarkerType.Arrow,
+            //   width: 20,
+            //   height: 20,
+            // }
           })),
         };
       })()
