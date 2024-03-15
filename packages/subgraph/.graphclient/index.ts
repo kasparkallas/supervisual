@@ -25694,6 +25694,7 @@ export type AllRelevantEntitiesQuery = {
 export const AllRelevantEntitiesDocument = gql`
   query AllRelevantEntities($accounts: [String!]!, $tokens: [String!]!) {
     poolDistributors(
+      first: 1000
       where: { account_in: $accounts, pool_: { token_in: $tokens } }
     ) {
       flowRate
@@ -25708,7 +25709,7 @@ export const AllRelevantEntitiesDocument = gql`
         }
       }
     }
-    poolMembers(where: { account_in: $accounts }) {
+    poolMembers(first: 1000, where: { account_in: $accounts }) {
       units
       account {
         id
@@ -25718,7 +25719,7 @@ export const AllRelevantEntitiesDocument = gql`
         id
         flowRate
         totalUnits
-        poolDistributors {
+        poolDistributors(first: 1000) {
           flowRate
           account {
             id
@@ -25731,6 +25732,7 @@ export const AllRelevantEntitiesDocument = gql`
       }
     }
     streams(
+      first: 1000
       where: {
         or: [
           { receiver_in: $accounts, token_in: $tokens }

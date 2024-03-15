@@ -2,18 +2,13 @@ import ReactFlow, {
   Background,
   useNodesState,
   useEdgesState,
-  Node,
-  Edge,
   Controls,
-  MiniMap,
   useReactFlow,
   ProOptions,
-  NodeOrigin,
   OnConnect,
   addEdge,
 } from "reactflow";
 import useForceLayout from "./force-layout/useForceLayout";
-import useAutoLayout, { type LayoutOptions } from "./auto-layout/useAutoLayout";
 
 import "reactflow/dist/style.css";
 import { useCallback, useMemo } from "react";
@@ -53,10 +48,10 @@ function Diagram(props: Props) {
     [props.nodes, props.edges],
   );
 
-  useForceLayout();
+  useForceLayout(props.nodes.length < 75);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(
-    layoutedElements.nodes,
+    layoutedElements.nodes as any,
   ); // todo: fix types
 
   const [edges, setEdges, onEdgesChange] = useEdgesState(
@@ -82,6 +77,7 @@ function Diagram(props: Props) {
       fitView
       edgeTypes={edgeTypes}
       connectionLineComponent={FloatingConnectionLine as any} // todo: types
+      minZoom={0.1}
       // defaultViewport={{
       //   x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0,
       //   y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0,

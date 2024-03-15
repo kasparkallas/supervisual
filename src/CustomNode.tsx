@@ -1,5 +1,5 @@
-import React, { memo } from "react";
-import { Handle, NodeToolbar, Position } from "reactflow";
+import React, { memo, useState } from "react";
+import { Handle, NodeToolbar, Position, useNodesState } from "reactflow";
 import { MyNode } from "./dataMapper";
 import { cn } from "./lib/utils";
 import {
@@ -12,6 +12,7 @@ import copy from "copy-text-to-clipboard";
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { Address } from "viem";
 import * as HoverCardPrimitive from "@radix-ui/react-hover-card";
+import { useDrag } from "@use-gesture/react";
 
 const route = getRouteApi("/");
 
@@ -19,10 +20,16 @@ function CustomNode({ data }: MyNode) {
   const navigate = useNavigate();
   const search = route.useSearch();
 
+  const [isBeingDragged, setIsBeingDragged] = useState(false);
+  const bind = useDrag(({ down, movement: [mx, my] }) => {
+    setIsBeingDragged(down);
+  });
+
   return (
-    <HoverCard openDelay={800}>
+    <HoverCard openDelay={800} open={isBeingDragged ? false : undefined}>
       <HoverCardTrigger>
         <div
+          {...bind}
           className={cn(
             "rounded-xl border-2 border-stone-600 px-4 py-2 shadow-md",
             data.isPool

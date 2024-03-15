@@ -4,6 +4,10 @@ sources:
       graphql:
         endpoint: "{context.url:https://polygon-mainnet.subgraph.x.superfluid.dev/}"
         retry: 5
+    # transforms:
+    #   - autoPagination:
+    #       validateSchema: true # Validates that the schema source actually contains the required input filters.
+    #       limitOfRecords: 1000
 documents:
   - "./*.graphql"
 codegen:

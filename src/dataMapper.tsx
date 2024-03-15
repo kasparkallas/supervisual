@@ -22,9 +22,16 @@ export type MyEdge = Edge<{
 }>;
 
 export const dataMapper = (
-  // accountAddress: Address,
+  accounts: Address[],
   data: AllRelevantEntitiesQuery,
 ) => {
+  const nodesFromAddresses: MyNode[] = accounts.map((x) => ({
+    id: x,
+    data: {
+      address: getAddress(x),
+    },
+  }));
+
   const nodesFromPoolMembers: MyNode[] = data.poolMembers
     .map((x) => [
       {
@@ -83,6 +90,7 @@ export const dataMapper = (
     .flat();
 
   const nodes: MyNode[] = [
+    ...nodesFromAddresses,
     ...nodesFromPoolMembers,
     ...nodesFromPoolDistributors,
     ...nodesFromStreams,

@@ -69,7 +69,7 @@ function DataProvider({ chain, tokens, accounts }: Props) {
   // todo: clean-up
   const results = data
     ? (() => {
-        const { nodes, edges } = dataMapper(data);
+        const { nodes, edges } = dataMapper(accounts, data);
 
         const uniqNodes = Object.entries(groupBy(nodes, (x) => x.id)).map(
           (x) => {
@@ -86,6 +86,7 @@ function DataProvider({ chain, tokens, accounts }: Props) {
 
         // uniqBy(nodes, (x) => x.id);
         const uniqEdges = uniqBy(edges, (x) => x.id); // todo: should sum the flow rates
+
         return {
           nodes: uniqNodes.map((node) => {
             const isSelected = accounts
@@ -105,7 +106,7 @@ function DataProvider({ chain, tokens, accounts }: Props) {
           }),
           edges: uniqEdges.map((x) => ({
             ...x,
-            animated: true,
+            animated: uniqEdges.length < 75,
             type: "floating",
             style: {
               strokeWidth: 3,

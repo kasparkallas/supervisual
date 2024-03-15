@@ -20,12 +20,16 @@ const nodesInitializedSelector = (state: ReactFlowState) =>
     (node) => node.width && node.height,
   ) && state.nodeInternals.size;
 
-function useForceLayout() {
+function useForceLayout(enable: boolean) {
   const elementCount = useStore(elementCountSelector);
   const nodesInitialized = useStore(nodesInitializedSelector);
   const { setNodes, getNodes, getEdges } = useReactFlow();
 
   useEffect(() => {
+    if (!enable) {
+      return;
+    }
+
     const nodes = getNodes();
     const edges = getEdges();
 
@@ -80,7 +84,7 @@ function useForceLayout() {
     return () => {
       simulation.stop();
     };
-  }, [elementCount, getNodes, getEdges, setNodes, nodesInitialized]);
+  }, [elementCount, getNodes, getEdges, setNodes, nodesInitialized, enable]);
 }
 
 export default useForceLayout;
