@@ -2,7 +2,7 @@ import { getBuiltGraphSDK } from "subgraph";
 
 import Diagram from "./Diagram";
 import { MarkerType, Panel, ReactFlowProvider } from "reactflow";
-import { dataMapper } from "./dataMapper";
+import { MyNode, dataMapper } from "./dataMapper";
 import {
   Dialog,
   DialogContent,
@@ -16,10 +16,16 @@ import { useQuery } from "@tanstack/react-query";
 import { DiagramInput } from "./userInputSchema";
 import { Button } from "./components/ui/button";
 import { DataForm } from "./DataForm";
-import { memoize, uniqBy } from "lodash";
+import { groupBy, memoize, uniqBy } from "lodash";
 import { shortenHex } from "./lib/shortenHex";
 import { Address, getAddress } from "viem";
 import sfMeta from "@superfluid-finance/metadata";
+import { deepmerge } from "@fastify/deepmerge";
+import { mergeDeep } from "./mergeDeep";
+
+// const deepmerger = deepmerge({
+//   all: true
+// });
 
 const graphSDK = memoize((chain: number) => {
   const metadata = sfMeta.getNetworkByChainId(chain);
@@ -64,8 +70,22 @@ function DataProvider({ chain, tokens, accounts }: Props) {
   const results = data
     ? (() => {
         const { nodes, edges } = dataMapper(data);
-        const uniqNodes = uniqBy(nodes, (x) => x.id);
-        const uniqEdges = uniqBy(edges, (x) => x.id);
+
+        const uniqNodes = Object.entries(groupBy(nodes, (x) => x.id)).map(
+          (x) => {
+            return {
+              ...x[1][0],
+              data: {
+                ...x[1][0].data,
+                isPool: x[1].some((y) => y.data.isPool),
+                isSuperApp: x[1].some((y) => y.data.isSuperApp),
+              },
+            };
+          },
+        );
+
+        // uniqBy(nodes, (x) => x.id);
+        const uniqEdges = uniqBy(edges, (x) => x.id); // todo: should sum the flow rates
         return {
           nodes: uniqNodes.map((node) => {
             const isSelected = accounts
@@ -124,7 +144,7 @@ function DataProvider({ chain, tokens, accounts }: Props) {
         <Dialog>
           <DialogTrigger asChild>
             <Button className="scale-95 rounded-full shadow-lg shadow-neutral-400 transition-transform hover:scale-100">
-              Select Tokens & Accounts
+              Configure Selection
             </Button>
           </DialogTrigger>
           <FormDialogContent />
@@ -141,9 +161,10 @@ const FormDialogContent = () => {
   return (
     <DialogContent className="sm:max-w-[425px]">
       <DialogHeader>
-        <DialogTitle>Select Tokens & Accounts</DialogTitle>
+        <DialogTitle>Configure Selection</DialogTitle>
         <DialogDescription>
-          The tokens and accounts you select will be used for the diagram.
+          The network, tokens and accounts you select will be used for the
+          diagram.
         </DialogDescription>
       </DialogHeader>
       <DataForm />

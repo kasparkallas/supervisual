@@ -82,14 +82,11 @@ export const dataMapper = (
     ])
     .flat();
 
-  const nodes: MyNode[] = uniqBy(
-    [
-      ...nodesFromPoolMembers,
-      ...nodesFromPoolDistributors,
-      ...nodesFromStreams,
-    ],
-    (x) => x.id,
-  );
+  const nodes: MyNode[] = [
+    ...nodesFromPoolMembers,
+    ...nodesFromPoolDistributors,
+    ...nodesFromStreams,
+  ];
 
   const edgesFromPoolDistributors: MyEdge[] = data.poolDistributors
     .map((x) => [
@@ -112,8 +109,10 @@ export const dataMapper = (
         target: x.account.id,
         data: {
           flowRate:
-            (BigInt(x.pool.flowRate) * BigInt(x.pool.totalUnits)) /
-            BigInt(x.units),
+            BigInt(x.units) > 0
+              ? (BigInt(x.pool.flowRate) * BigInt(x.pool.totalUnits)) /
+                BigInt(x.units)
+              : 0n,
         },
       },
       ...x.pool.poolDistributors.map((y) => ({
@@ -140,14 +139,11 @@ export const dataMapper = (
     ])
     .flat();
 
-  const edges: MyEdge[] = uniqBy(
-    [
-      ...edgesFromPoolMembers,
-      ...edgesFromStreams,
-      ...edgesFromPoolDistributors,
-    ],
-    (x) => x.id,
-  );
+  const edges: MyEdge[] = [
+    ...edgesFromPoolMembers,
+    ...edgesFromStreams,
+    ...edgesFromPoolDistributors,
+  ];
 
   return { nodes, edges };
 };
