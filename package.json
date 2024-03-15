@@ -40,6 +40,7 @@
     "subgraph": "workspace:*",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
+    "use-async-effect": "^2.2.7",
     "viem": "^2.8.5",
     "zod": "^3.22.4"
   },

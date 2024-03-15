@@ -9,7 +9,7 @@ import {
   SimulationLinkDatum,
 } from "d3-force";
 import { useReactFlow, ReactFlowState, useStore, Node } from "reactflow";
-import collide from "./collide";
+import collide from "./rectangleCollide";
 
 type SimNodeType = SimulationNodeDatum & Node;
 
@@ -45,18 +45,17 @@ function useForceLayout() {
 
     const simulation = forceSimulation()
       .nodes(simulationNodes)
-      .force("charge", forceManyBody().strength(-100))
+      .force("charge", forceManyBody().strength(-150))
       .force(
         "link",
         forceLink(simulationLinks)
           .id((d: any) => d.id)
-          .strength(0.0025),
+          .strength(0.003),
         // .distance(500),
       )
-      .force("x", forceX().x(0).strength(0.0015))
-      .force("y", forceY().y(0).strength(0.0015))
+      .force("x", forceX().x(0).strength(0.008))
+      .force("y", forceY().y(0).strength(0.004))
       .force("collide", collide())
-      .alphaTarget(0.002)
       .on("tick", () => {
         setNodes((nodes) =>
           nodes.map((node, i) => {

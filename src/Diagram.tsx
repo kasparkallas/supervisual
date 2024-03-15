@@ -12,12 +12,12 @@ import ReactFlow, {
   OnConnect,
   addEdge,
 } from "reactflow";
-import useForceLayout from "./useForceLayout";
+import useForceLayout from "./force-layout/useForceLayout";
+import useAutoLayout, { type LayoutOptions } from "./auto-layout/useAutoLayout";
 
 import "reactflow/dist/style.css";
 import { useCallback, useMemo } from "react";
 import { MyEdge, MyNode } from "./dataMapper";
-import Dagre from "@dagrejs/dagre";
 
 type Props = {
   nodes: MyNode[];
@@ -25,6 +25,7 @@ type Props = {
 };
 
 import CustomNode from "./CustomNode";
+import dagreLayout from "./auto-layout/algorithms/dagre";
 
 const nodeTypes = {
   custom: CustomNode,
@@ -38,7 +39,11 @@ function Diagram(props: Props) {
   const { screenToFlowPosition } = useReactFlow();
 
   const layoutedElements = useMemo(
-    () => getLayoutedElements(props.nodes, props.edges),
+    () =>
+      dagreLayout(props.nodes as any, props.edges, {
+        direction: "TB",
+        spacing: [200, 300],
+      }),
     [props.nodes, props.edges],
   );
 
@@ -47,6 +52,7 @@ function Diagram(props: Props) {
   const [nodes, setNodes, onNodesChange] = useNodesState(
     layoutedElements.nodes,
   ); // todo: fix types
+
   const [edges, setEdges, onEdgesChange] = useEdgesState(
     layoutedElements.edges,
   );
@@ -84,36 +90,36 @@ function Diagram(props: Props) {
 export default Diagram;
 
 // # Dagre stuff
-const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
+// const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
 
-const getLayoutedElements = (
-  nodes: MyNode[],
-  edges: MyEdge[],
-): {
-  nodes: Node[];
-  edges: Edge[];
-} => {
-  if (!nodes.length) {
-    return { nodes: [], edges };
-  }
+// const getLayoutedElements = (
+//   nodes: MyNode[],
+//   edges: MyEdge[],
+// ): {
+//   nodes: Node[];
+//   edges: Edge[];
+// } => {
+//   if (!nodes.length) {
+//     return { nodes: [], edges };
+//   }
 
-  g.setGraph({
-    rankdir: "TB",
-    nodesep: 200,
-    ranksep: 300,
-    ranker: "longest-path",
-  });
+//   g.setGraph({
+//     rankdir: "TB",
+//     nodesep: 200,
+//     ranksep: 300,
+//     ranker: "longest-path",
+//   });
 
-  edges.forEach((edge) => g.setEdge(edge.source, edge.target));
-  nodes.forEach((node) => g.setNode(node.id, node));
+//   edges.forEach((edge) => g.setEdge(edge.source, edge.target));
+//   nodes.forEach((node) => g.setNode(node.id, node));
 
-  Dagre.layout(g);
+//   Dagre.layout(g);
 
-  return {
-    nodes: nodes.map((node) => {
-      const { x, y } = g.node(node.id);
-      return { ...node, position: { x, y } };
-    }),
-    edges,
-  };
-};
+//   return {
+//     nodes: nodes.map((node) => {
+//       const { x, y } = g.node(node.id);
+//       return { ...node, position: { x, y } };
+//     }),
+//     edges,
+//   };
+// };
