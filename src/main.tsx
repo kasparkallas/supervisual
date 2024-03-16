@@ -11,9 +11,10 @@ import qs from "query-string";
 import { routeTree } from "./routeTree.gen";
 
 const customStringifier: SearchSerializer = (
-  searchObj: Record<string, any>,
+  searchObject: Record<string, any>,
 ) => {
-  const stringified = qs.stringify(searchObj, {
+  const stringified = qs.stringify(searchObject, {
+    skipNull: true,
     arrayFormat: "comma",
     sort: (a, b) => {
       // sort chain and tokens to the front
@@ -23,10 +24,16 @@ const customStringifier: SearchSerializer = (
       if (b === "chain") {
         return 1;
       }
-      if (a === "tokens") {
+      if (a === "block") {
         return -1;
       }
-      if (b === "tokens") {
+      if (b === "block") {
+        return 1;
+      }
+      if (a === "accounts") {
+        return -1;
+      }
+      if (b === "accounts") {
         return 1;
       }
       return 0;

@@ -12,24 +12,21 @@ import copy from "copy-text-to-clipboard";
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { Address } from "viem";
 import * as HoverCardPrimitive from "@radix-ui/react-hover-card";
-import { useDrag } from "@use-gesture/react";
 
 const route = getRouteApi("/");
 
-function CustomNode({ data }: NodeProps<MyNode>) {
+function CustomNode({ dragging, data }: NodeProps<MyNode>) {
   const navigate = useNavigate();
   const search = route.useSearch();
 
-  const [isBeingDragged, setIsBeingDragged] = useState(false);
-  const bind = useDrag(({ down, movement: [mx, my] }) => {
-    setIsBeingDragged(down);
-  });
-
   return (
-    <HoverCard openDelay={800} open={isBeingDragged ? false : undefined}>
+    <HoverCard
+      openDelay={500}
+      closeDelay={0}
+      open={dragging ? false : undefined}
+    >
       <HoverCardTrigger>
         <div
-          {...bind}
           className={cn(
             "rounded-xl border-2 border-stone-600 px-4 py-2 shadow-md",
             data.isPool

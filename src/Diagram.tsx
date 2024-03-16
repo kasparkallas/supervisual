@@ -11,7 +11,7 @@ import ReactFlow, {
 import useForceLayout from "./force-layout/useForceLayout";
 
 import "reactflow/dist/style.css";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { MyEdge, MyNode } from "./dataMapper";
 
 type Props = {
@@ -23,6 +23,7 @@ import CustomNode from "./CustomNode";
 import dagreLayout from "./auto-layout/algorithms/dagre";
 import FloatingEdge from "./floating-edge/FloatingEdge";
 import FloatingConnectionLine from "./floating-edge/FloatingConnectionLine";
+import useAutoLayout from "./auto-layout/useAutoLayout";
 
 const nodeTypes = {
   custom: CustomNode,
@@ -37,29 +38,51 @@ const proOptions: ProOptions = { account: "paid-pro", hideAttribution: true };
 function Diagram(props: Props) {
   const { screenToFlowPosition } = useReactFlow();
 
-  const layoutedElements = useMemo(
-    () =>
-      dagreLayout(props.nodes as any, props.edges, {
+  // const layoutedElements = useMemo(
+  //   () =>
+  //     dagreLayout(props.nodes, props.edges, {
+  //       direction: "TB",
+  //       spacing: [200, 300],
+  //     }),
+  //   [props.nodes, props.edges],
+  // );
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(props.nodes);
+
+  const [edges, setEdges, onEdgesChange] = useEdgesState(props.edges);
+
+  useEffect(() => {
+    if (props.nodes.length) {
+      const { nodes, edges } = dagreLayout(props.nodes, props.edges, {
         direction: "TB",
         spacing: [200, 300],
-      }),
-    [props.nodes, props.edges],
-  );
+      });
+      setNodes(nodes);
+      setEdges(edges);
+    } else {
+      setNodes([]);
+      setEdges([]);
+    }
+  }, [props.nodes, props.edges, setNodes, setEdges]);
 
-  useForceLayout(props.nodes.length < 75);
+  // useAutoLayout({
+  //   algorithm: "dagre",
+  //   direction: "TB",
+  //   spacing: [200, 300],
+  // });
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(
-    layoutedElements.nodes,
-  );
+  // useForceLayout(props.nodes.length < 75);
 
-  const [edges, setEdges, onEdgesChange] = useEdgesState(
-    layoutedElements.edges,
-  );
+  // useEffect(() => {
+  //   console.log("loop?")
+  //   setNodes(props.nodes);
+  //   setEdges(props.edges);
+  // }, [props.nodes, props.edges]);
 
-  const onConnect: OnConnect = useCallback(
-    (params) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges],
-  );
+  // const onConnect: OnConnect = useCallback(
+  //   (params) => setEdges((eds) => addEdge(params, eds)),
+  //   [setEdges],
+  // );
 
   return (
     <ReactFlow
@@ -68,7 +91,7 @@ function Diagram(props: Props) {
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       proOptions={proOptions}
-      onConnect={onConnect}
+      // onConnect={onConnect}
       nodeTypes={nodeTypes}
       fitView
       edgeTypes={edgeTypes}

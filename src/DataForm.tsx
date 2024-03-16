@@ -74,7 +74,7 @@ export function DataForm() {
 
   function onSubmit(values: FormOutput) {
     navigate({
-      search: values,
+      search: { ...values, block: search.block },
     });
   }
 

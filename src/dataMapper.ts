@@ -12,12 +12,23 @@ export type MyNode = Node<{
   isSelected?: boolean;
   label: string;
   isSuperApp?: boolean;
+  createdAtBlockNumber: number;
+  createdAtTimestamp: number;
+  updatedAtBlockNumber: number;
+  updatedAtTimestamp: number;
 }> &
   Label;
 
 export type PartialNode = {
   id: string;
-  data: Partial<MyNode["data"]>;
+  data: Partial<MyNode["data"]> &
+    Pick<
+      MyNode,
+      | "createdAtBlockNumber"
+      | "createdAtTimestamp"
+      | "updatedAtBlockNumber"
+      | "updatedAtTimestamp"
+    >;
 };
 
 export type MyEdge = Edge<{
@@ -37,10 +48,14 @@ function mapNodes(
   selectedAccounts: Address[],
   data: AllRelevantEntitiesQuery,
 ): MyNode[] {
-  const nodesFromAddresses: PartialNode[] = selectedAccounts.map((x) => ({
-    id: x,
+  const nodesFromAccounts: PartialNode[] = data.accounts.map((x) => ({
+    id: x.id,
     data: {
-      isSelected: true,
+      isSuperApp: x.isSuperApp,
+      createdAtBlockNumber: Number(x.createdAtBlockNumber),
+      createdAtTimestamp: Number(x.createdAtTimestamp),
+      updatedAtBlockNumber: Number(x.updatedAtBlockNumber),
+      updatedAtTimestamp: Number(x.updatedAtTimestamp),
     },
   }));
 
@@ -50,6 +65,10 @@ function mapNodes(
         id: x.pool.id,
         data: {
           isPool: true,
+          createdAtBlockNumber: Number(x.pool.createdAtBlockNumber),
+          createdAtTimestamp: Number(x.pool.createdAtTimestamp),
+          updatedAtBlockNumber: Number(x.pool.updatedAtBlockNumber),
+          updatedAtTimestamp: Number(x.pool.updatedAtTimestamp),
         },
       },
       // ...x.pool.poolDistributors.map((y) => ({
@@ -67,12 +86,20 @@ function mapNodes(
         id: x.pool.id,
         data: {
           isPool: true,
+          createdAtBlockNumber: Number(x.pool.createdAtBlockNumber),
+          createdAtTimestamp: Number(x.pool.createdAtTimestamp),
+          updatedAtBlockNumber: Number(x.pool.updatedAtBlockNumber),
+          updatedAtTimestamp: Number(x.pool.updatedAtTimestamp),
         },
       },
       {
         id: x.account.id,
         data: {
           isSuperApp: x.account.isSuperApp,
+          createdAtBlockNumber: Number(x.createdAtBlockNumber), // use the pool distributor's
+          createdAtTimestamp: Number(x.createdAtTimestamp),
+          updatedAtBlockNumber: Number(x.updatedAtBlockNumber),
+          updatedAtTimestamp: Number(x.updatedAtTimestamp),
         },
       },
     ])
@@ -84,24 +111,35 @@ function mapNodes(
         id: x.receiver.id,
         data: {
           isSuperApp: x.receiver.isSuperApp,
+          createdAtBlockNumber: Number(x.createdAtBlockNumber),
+          createdAtTimestamp: Number(x.createdAtTimestamp),
+          updatedAtBlockNumber: Number(x.updatedAtBlockNumber),
+          updatedAtTimestamp: Number(x.updatedAtTimestamp),
         },
       },
       {
         id: x.sender.id,
         data: {
           isSuperApp: x.sender.isSuperApp,
+          createdAtBlockNumber: Number(x.createdAtBlockNumber),
+          createdAtTimestamp: Number(x.createdAtTimestamp),
+          updatedAtBlockNumber: Number(x.updatedAtBlockNumber),
+          updatedAtTimestamp: Number(x.updatedAtTimestamp),
         },
       },
     ])
     .flat();
 
   const nodesButRedundant: PartialNode[] = [
-    ...nodesFromAddresses,
+    ...nodesFromAccounts,
     ...nodesFromPoolMembers,
     ...nodesFromPoolDistributors,
     ...nodesFromStreams,
   ];
 
+  const selectAccountsMap = new Map(
+    selectedAccounts.map((x) => [x.toLowerCase(), true]),
+  );
   const uniqMergedNodes = Object.entries(
     groupBy(nodesButRedundant, (x) => x.id),
   ).map(([, nodeFromDifferentSources]) => {
@@ -116,7 +154,19 @@ function mapNodes(
         ...root.data,
         isPool: nodeFromDifferentSources.some((x) => x.data.isPool),
         isSuperApp: nodeFromDifferentSources.some((x) => x.data.isSuperApp),
-        isSelected: nodeFromDifferentSources.some((x) => x.data.isSelected),
+        isSelected: selectAccountsMap.has(root.id),
+        createdAtBlockNumber: Math.min(
+          ...nodeFromDifferentSources.map((x) => x.data.createdAtBlockNumber),
+        ),
+        createdAtTimestamp: Math.min(
+          ...nodeFromDifferentSources.map((x) => x.data.createdAtTimestamp),
+        ),
+        updatedAtBlockNumber: Math.max(
+          ...nodeFromDifferentSources.map((x) => x.data.updatedAtBlockNumber),
+        ),
+        updatedAtTimestamp: Math.max(
+          ...nodeFromDifferentSources.map((x) => x.data.updatedAtTimestamp),
+        ),
       },
     };
   });

@@ -1,0 +1,8 @@
+query CurrentBlock {
+  _meta {
+    block {
+      number
+      timestamp
+    }
+  }
+}

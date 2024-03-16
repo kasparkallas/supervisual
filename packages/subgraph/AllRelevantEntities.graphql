@@ -1,6 +1,7 @@
 query AllRelevantEntities(
   $block: Block_height
   $accounts: [String!]!
+  $accounts_bytes: [ID!]!
   $tokens: [String!]!
 ) {
   poolDistributors(
@@ -8,12 +9,20 @@ query AllRelevantEntities(
     first: 1000
     where: { account_in: $accounts, pool_: { token_in: $tokens } }
   ) {
+    createdAtBlockNumber
+    createdAtTimestamp
+    updatedAtBlockNumber
+    updatedAtTimestamp
     flowRate
     account {
       id
       isSuperApp
     }
     pool {
+      createdAtBlockNumber
+      createdAtTimestamp
+      updatedAtBlockNumber
+      updatedAtTimestamp
       id
       token {
         id
@@ -22,12 +31,20 @@ query AllRelevantEntities(
     }
   }
   poolMembers(block: $block, first: 1000, where: { account_in: $accounts }) {
+    createdAtBlockNumber
+    createdAtTimestamp
+    updatedAtBlockNumber
+    updatedAtTimestamp
     units
     account {
       id
       isSuperApp
     }
     pool {
+      createdAtBlockNumber
+      createdAtTimestamp
+      updatedAtBlockNumber
+      updatedAtTimestamp
       id
       flowRate
       totalUnits
@@ -53,6 +70,10 @@ query AllRelevantEntities(
       ]
     }
   ) {
+    createdAtBlockNumber
+    createdAtTimestamp
+    updatedAtBlockNumber
+    updatedAtTimestamp
     receiver {
       id
       isSuperApp
@@ -65,5 +86,13 @@ query AllRelevantEntities(
       id
     }
     currentFlowRate
+  }
+  accounts(where: { id_in: $accounts_bytes }) {
+    id
+    isSuperApp
+    createdAtBlockNumber
+    createdAtTimestamp
+    updatedAtBlockNumber
+    updatedAtTimestamp
   }
 }

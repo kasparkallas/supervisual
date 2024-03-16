@@ -25609,6 +25609,13 @@ export async function getMeshOptions(): Promise<GetMeshOptions> {
           },
           location: "AllRelevantEntitiesDocument.graphql",
         },
+        {
+          document: CurrentBlockDocument,
+          get rawSDL() {
+            return printWithCache(CurrentBlockDocument);
+          },
+          location: "CurrentBlockDocument.graphql",
+        },
       ];
     },
     fetchFn,
@@ -25660,37 +25667,91 @@ export function getBuiltGraphSDK<TGlobalContext = any, TOperationContext = any>(
 export type AllRelevantEntitiesQueryVariables = Exact<{
   block?: InputMaybe<Block_height>;
   accounts: Array<Scalars["String"]> | Scalars["String"];
+  accounts_bytes: Array<Scalars["ID"]> | Scalars["ID"];
   tokens: Array<Scalars["String"]> | Scalars["String"];
 }>;
 
 export type AllRelevantEntitiesQuery = {
   poolDistributors: Array<
-    Pick<PoolDistributor, "flowRate"> & {
+    Pick<
+      PoolDistributor,
+      | "createdAtBlockNumber"
+      | "createdAtTimestamp"
+      | "updatedAtBlockNumber"
+      | "updatedAtTimestamp"
+      | "flowRate"
+    > & {
       account: Pick<Account, "id" | "isSuperApp">;
-      pool: Pick<Pool, "id"> & { token: Pick<Token, "id"> };
+      pool: Pick<
+        Pool,
+        | "createdAtBlockNumber"
+        | "createdAtTimestamp"
+        | "updatedAtBlockNumber"
+        | "updatedAtTimestamp"
+        | "id"
+      > & { token: Pick<Token, "id"> };
     }
   >;
   poolMembers: Array<
-    Pick<PoolMember, "units"> & {
+    Pick<
+      PoolMember,
+      | "createdAtBlockNumber"
+      | "createdAtTimestamp"
+      | "updatedAtBlockNumber"
+      | "updatedAtTimestamp"
+      | "units"
+    > & {
       account: Pick<Account, "id" | "isSuperApp">;
-      pool: Pick<Pool, "id" | "flowRate" | "totalUnits"> & {
-        token: Pick<Token, "id">;
-      };
+      pool: Pick<
+        Pool,
+        | "createdAtBlockNumber"
+        | "createdAtTimestamp"
+        | "updatedAtBlockNumber"
+        | "updatedAtTimestamp"
+        | "id"
+        | "flowRate"
+        | "totalUnits"
+      > & { token: Pick<Token, "id"> };
     }
   >;
   streams: Array<
-    Pick<Stream, "currentFlowRate"> & {
+    Pick<
+      Stream,
+      | "createdAtBlockNumber"
+      | "createdAtTimestamp"
+      | "updatedAtBlockNumber"
+      | "updatedAtTimestamp"
+      | "currentFlowRate"
+    > & {
       receiver: Pick<Account, "id" | "isSuperApp">;
       sender: Pick<Account, "id" | "isSuperApp">;
       token: Pick<Token, "id">;
     }
   >;
+  accounts: Array<
+    Pick<
+      Account,
+      | "id"
+      | "isSuperApp"
+      | "createdAtBlockNumber"
+      | "createdAtTimestamp"
+      | "updatedAtBlockNumber"
+      | "updatedAtTimestamp"
+    >
+  >;
+};
+
+export type CurrentBlockQueryVariables = Exact<{ [key: string]: never }>;
+
+export type CurrentBlockQuery = {
+  _meta?: Maybe<{ block: Pick<_Block_, "number" | "timestamp"> }>;
 };
 
 export const AllRelevantEntitiesDocument = gql`
   query AllRelevantEntities(
     $block: Block_height
     $accounts: [String!]!
+    $accounts_bytes: [ID!]!
     $tokens: [String!]!
   ) {
     poolDistributors(
@@ -25698,12 +25759,20 @@ export const AllRelevantEntitiesDocument = gql`
       first: 1000
       where: { account_in: $accounts, pool_: { token_in: $tokens } }
     ) {
+      createdAtBlockNumber
+      createdAtTimestamp
+      updatedAtBlockNumber
+      updatedAtTimestamp
       flowRate
       account {
         id
         isSuperApp
       }
       pool {
+        createdAtBlockNumber
+        createdAtTimestamp
+        updatedAtBlockNumber
+        updatedAtTimestamp
         id
         token {
           id
@@ -25711,12 +25780,20 @@ export const AllRelevantEntitiesDocument = gql`
       }
     }
     poolMembers(block: $block, first: 1000, where: { account_in: $accounts }) {
+      createdAtBlockNumber
+      createdAtTimestamp
+      updatedAtBlockNumber
+      updatedAtTimestamp
       units
       account {
         id
         isSuperApp
       }
       pool {
+        createdAtBlockNumber
+        createdAtTimestamp
+        updatedAtBlockNumber
+        updatedAtTimestamp
         id
         flowRate
         totalUnits
@@ -25735,6 +25812,10 @@ export const AllRelevantEntitiesDocument = gql`
         ]
       }
     ) {
+      createdAtBlockNumber
+      createdAtTimestamp
+      updatedAtBlockNumber
+      updatedAtTimestamp
       receiver {
         id
         isSuperApp
@@ -25748,11 +25829,29 @@ export const AllRelevantEntitiesDocument = gql`
       }
       currentFlowRate
     }
+    accounts(where: { id_in: $accounts_bytes }) {
+      id
+      isSuperApp
+      createdAtBlockNumber
+      createdAtTimestamp
+      updatedAtBlockNumber
+      updatedAtTimestamp
+    }
   }
 ` as unknown as DocumentNode<
   AllRelevantEntitiesQuery,
   AllRelevantEntitiesQueryVariables
 >;
+export const CurrentBlockDocument = gql`
+  query CurrentBlock {
+    _meta {
+      block {
+        number
+        timestamp
+      }
+    }
+  }
+` as unknown as DocumentNode<CurrentBlockQuery, CurrentBlockQueryVariables>;
 
 export type Requester<C = {}, E = unknown> = <R, V>(
   doc: DocumentNode,
@@ -25773,6 +25872,16 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
         variables,
         options,
       ) as Promise<AllRelevantEntitiesQuery>;
+    },
+    CurrentBlock(
+      variables?: CurrentBlockQueryVariables,
+      options?: C,
+    ): Promise<CurrentBlockQuery> {
+      return requester<CurrentBlockQuery, CurrentBlockQueryVariables>(
+        CurrentBlockDocument,
+        variables,
+        options,
+      ) as Promise<CurrentBlockQuery>;
     },
   };
 }

@@ -17,6 +17,7 @@ export const ethereumAddressCollectionSchema = ethereumAddressSchema
   .default([]);
 
 export const diagramInputSchema = z.object({
+  block: z.coerce.number().nullable().default(null),
   chain: z.coerce.number().default(10),
   tokens: ethereumAddressCollectionSchema,
   accounts: ethereumAddressCollectionSchema,

@@ -55,8 +55,8 @@ function useForceLayout(enable: boolean) {
         "link",
         forceLink(simulationLinks)
           .id((d: any) => d.id)
-          .strength(0.003),
-        // .distance(500),
+          .strength(0.003)
+          .distance(500),
       )
       .force("x", forceX().x(0).strength(0.008))
       .force("y", forceY().y(0).strength(0.004))
