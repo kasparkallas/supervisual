@@ -38,18 +38,20 @@ const proOptions: ProOptions = { account: "paid-pro", hideAttribution: true };
 function Diagram(props: Props) {
   const { screenToFlowPosition } = useReactFlow();
 
-  // const layoutedElements = useMemo(
-  //   () =>
-  //     dagreLayout(props.nodes, props.edges, {
-  //       direction: "TB",
-  //       spacing: [200, 300],
-  //     }),
-  //   [props.nodes, props.edges],
-  // );
+  const { nodes: initialNodes, edges: initialEdges } = useMemo(() => {
+    if (props.nodes.length) {
+      const { nodes, edges } = dagreLayout(props.nodes, props.edges, {
+        direction: "TB",
+        spacing: [200, 300],
+      });
+      return { nodes, edges };
+    } else {
+      return { nodes: [], edges: [] };
+    }
+  }, [props.edges, props.nodes]);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(props.nodes);
-
-  const [edges, setEdges, onEdgesChange] = useEdgesState(props.edges);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   useEffect(() => {
     if (props.nodes.length) {
@@ -65,24 +67,7 @@ function Diagram(props: Props) {
     }
   }, [props.nodes, props.edges, setNodes, setEdges]);
 
-  // useAutoLayout({
-  //   algorithm: "dagre",
-  //   direction: "TB",
-  //   spacing: [200, 300],
-  // });
-
-  // useForceLayout(props.nodes.length < 75);
-
-  // useEffect(() => {
-  //   console.log("loop?")
-  //   setNodes(props.nodes);
-  //   setEdges(props.edges);
-  // }, [props.nodes, props.edges]);
-
-  // const onConnect: OnConnect = useCallback(
-  //   (params) => setEdges((eds) => addEdge(params, eds)),
-  //   [setEdges],
-  // );
+  useForceLayout(props.nodes.length < 75);
 
   return (
     <ReactFlow
@@ -91,7 +76,6 @@ function Diagram(props: Props) {
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       proOptions={proOptions}
-      // onConnect={onConnect}
       nodeTypes={nodeTypes}
       fitView
       edgeTypes={edgeTypes}

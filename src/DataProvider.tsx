@@ -19,7 +19,7 @@ import { DataForm } from "./DataForm";
 import { memoize } from "lodash";
 import sfMeta from "@superfluid-finance/metadata";
 import { BlockSlider } from "./BlockSlider";
-import { useMemo } from "react";
+import { useId, useMemo } from "react";
 
 export const graphSDK = memoize((chain: number) => {
   const metadata = sfMeta.getNetworkByChainId(chain);
@@ -59,24 +59,25 @@ function DataProvider({ chain, tokens, accounts, block }: Props) {
   });
 
   const results = useMemo(() => {
-    return data
-      ? (() => {
-          const { nodes, edges } = dataMapper(chain, accounts, data);
-
-          return {
-            nodes,
-            edges,
-          };
-        })()
-      : {
-          nodes: [],
-          edges: [],
-        };
+    if (data) {
+      const { nodes, edges } = dataMapper(chain, accounts, data);
+      return {
+        nodes,
+        edges,
+      };
+    } else {
+      return {
+        nodes: [],
+        edges: [],
+      };
+    }
   }, [data]);
 
   // console.log({ data, results, block })
 
   // todo: handle loading better
+
+  const key = useMemo(() => Date.now(), [data]);
 
   return (
     <ReactFlowProvider>
@@ -96,7 +97,7 @@ function DataProvider({ chain, tokens, accounts, block }: Props) {
       <Panel position="bottom-center">
         <BlockSlider block={block} nodes={results.nodes} />
       </Panel>
-      <Diagram nodes={results.nodes} edges={results.edges} />
+      <Diagram key={key} nodes={results.nodes} edges={results.edges} />
     </ReactFlowProvider>
   );
 }

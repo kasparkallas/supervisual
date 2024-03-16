@@ -71,12 +71,16 @@ function mapNodes(
           updatedAtTimestamp: Number(x.pool.updatedAtTimestamp),
         },
       },
-      // ...x.pool.poolDistributors.map((y) => ({
-      //   id: y.account.id,
-      //   data: {
-      //     isSuperApp: x.account.isSuperApp,
-      //   },
-      // })),
+      {
+        id: x.account.id,
+        data: {
+          isSuperApp: x.account.isSuperApp,
+          createdAtBlockNumber: Number(x.createdAtBlockNumber),
+          createdAtTimestamp: Number(x.createdAtTimestamp),
+          updatedAtBlockNumber: Number(x.updatedAtBlockNumber),
+          updatedAtTimestamp: Number(x.updatedAtTimestamp),
+        },
+      },
     ])
     .flat();
 
@@ -137,7 +141,7 @@ function mapNodes(
     ...nodesFromStreams,
   ];
 
-  const selectAccountsMap = new Map(
+  const selectedAccountsMap = new Map(
     selectedAccounts.map((x) => [x.toLowerCase(), true]),
   );
   const uniqMergedNodes = Object.entries(
@@ -154,7 +158,7 @@ function mapNodes(
         ...root.data,
         isPool: nodeFromDifferentSources.some((x) => x.data.isPool),
         isSuperApp: nodeFromDifferentSources.some((x) => x.data.isSuperApp),
-        isSelected: selectAccountsMap.has(root.id),
+        isSelected: selectedAccountsMap.has(root.id),
         createdAtBlockNumber: Math.min(
           ...nodeFromDifferentSources.map((x) => x.data.createdAtBlockNumber),
         ),
