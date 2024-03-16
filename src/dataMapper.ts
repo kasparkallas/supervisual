@@ -52,12 +52,12 @@ function mapNodes(
           isPool: true,
         },
       },
-      ...x.pool.poolDistributors.map((y) => ({
-        id: y.account.id,
-        data: {
-          isSuperApp: x.account.isSuperApp,
-        },
-      })),
+      // ...x.pool.poolDistributors.map((y) => ({
+      //   id: y.account.id,
+      //   data: {
+      //     isSuperApp: x.account.isSuperApp,
+      //   },
+      // })),
     ])
     .flat();
 
@@ -167,14 +167,14 @@ function mapEdges(data: AllRelevantEntitiesQuery) {
               : 0n,
         },
       },
-      ...x.pool.poolDistributors.map((y) => ({
-        id: `${x.pool.token.id}-${y.account.id}-${x.pool.id}`,
-        source: y.account.id,
-        target: x.pool.id,
-        data: {
-          flowRate: BigInt(y.flowRate),
-        },
-      })),
+      // ...x.pool.poolDistributors.map((y) => ({
+      //   id: `${x.pool.token.id}-${y.account.id}-${x.pool.id}`,
+      //   source: y.account.id,
+      //   target: x.pool.id,
+      //   data: {
+      //     flowRate: BigInt(y.flowRate),
+      //   },
+      // })),
     ])
     .flat();
 

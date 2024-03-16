@@ -25658,6 +25658,7 @@ export function getBuiltGraphSDK<TGlobalContext = any, TOperationContext = any>(
   );
 }
 export type AllRelevantEntitiesQueryVariables = Exact<{
+  block?: InputMaybe<Block_height>;
   accounts: Array<Scalars["String"]> | Scalars["String"];
   tokens: Array<Scalars["String"]> | Scalars["String"];
 }>;
@@ -25673,11 +25674,6 @@ export type AllRelevantEntitiesQuery = {
     Pick<PoolMember, "units"> & {
       account: Pick<Account, "id" | "isSuperApp">;
       pool: Pick<Pool, "id" | "flowRate" | "totalUnits"> & {
-        poolDistributors: Array<
-          Pick<PoolDistributor, "flowRate"> & {
-            account: Pick<Account, "id" | "isSuperApp">;
-          }
-        >;
         token: Pick<Token, "id">;
       };
     }
@@ -25692,8 +25688,13 @@ export type AllRelevantEntitiesQuery = {
 };
 
 export const AllRelevantEntitiesDocument = gql`
-  query AllRelevantEntities($accounts: [String!]!, $tokens: [String!]!) {
+  query AllRelevantEntities(
+    $block: Block_height
+    $accounts: [String!]!
+    $tokens: [String!]!
+  ) {
     poolDistributors(
+      block: $block
       first: 1000
       where: { account_in: $accounts, pool_: { token_in: $tokens } }
     ) {
@@ -25709,7 +25710,7 @@ export const AllRelevantEntitiesDocument = gql`
         }
       }
     }
-    poolMembers(first: 1000, where: { account_in: $accounts }) {
+    poolMembers(block: $block, first: 1000, where: { account_in: $accounts }) {
       units
       account {
         id
@@ -25719,19 +25720,13 @@ export const AllRelevantEntitiesDocument = gql`
         id
         flowRate
         totalUnits
-        poolDistributors(first: 1000) {
-          flowRate
-          account {
-            id
-            isSuperApp
-          }
-        }
         token {
           id
         }
       }
     }
     streams(
+      block: $block
       first: 1000
       where: {
         or: [

@@ -1,8 +1,8 @@
 import { getBuiltGraphSDK } from "subgraph";
 
 import Diagram from "./Diagram";
-import { MarkerType, Panel, ReactFlowProvider } from "reactflow";
-import { MyNode, dataMapper } from "./dataMapper";
+import { Panel, ReactFlowProvider } from "reactflow";
+import { dataMapper } from "./dataMapper";
 import {
   Dialog,
   DialogContent,
@@ -16,9 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import { DiagramInput } from "./diagramInputSchema";
 import { Button } from "./components/ui/button";
 import { DataForm } from "./DataForm";
-import { groupBy, memoize, uniqBy } from "lodash";
-import { shortenHex } from "./lib/shortenHex";
-import { Address, getAddress } from "viem";
+import { memoize } from "lodash";
 import sfMeta from "@superfluid-finance/metadata";
 
 const graphSDK = memoize((chain: number) => {
@@ -39,6 +37,7 @@ function DataProvider({ chain, tokens, accounts }: Props) {
     queryKey: ["chain", chain, "tokens", ...tokens, "accounts", ...accounts],
     queryFn: () =>
       graphSDK(chain).AllRelevantEntities({
+        block: null,
         accounts: accounts,
         tokens: tokens,
       }),

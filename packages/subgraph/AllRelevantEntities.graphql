@@ -1,5 +1,10 @@
-query AllRelevantEntities($accounts: [String!]!, $tokens: [String!]!) {
+query AllRelevantEntities(
+  $block: Block_height
+  $accounts: [String!]!
+  $tokens: [String!]!
+) {
   poolDistributors(
+    block: $block
     first: 1000
     where: { account_in: $accounts, pool_: { token_in: $tokens } }
   ) {
@@ -13,9 +18,10 @@ query AllRelevantEntities($accounts: [String!]!, $tokens: [String!]!) {
       token {
         id
       }
+      # should pool members be included here?
     }
   }
-  poolMembers(first: 1000, where: { account_in: $accounts }) {
+  poolMembers(block: $block, first: 1000, where: { account_in: $accounts }) {
     units
     account {
       id
@@ -25,19 +31,20 @@ query AllRelevantEntities($accounts: [String!]!, $tokens: [String!]!) {
       id
       flowRate
       totalUnits
-      poolDistributors(first: 1000) {
-        flowRate
-        account {
-          id
-          isSuperApp
-        }
-      }
+      # poolDistributors(block: $block, first: 1000) {
+      #   flowRate
+      #   account {
+      #     id
+      #     isSuperApp
+      #   }
+      # }
       token {
         id
       }
     }
   }
   streams(
+    block: $block
     first: 1000
     where: {
       or: [
