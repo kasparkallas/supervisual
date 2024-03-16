@@ -1,5 +1,5 @@
-import React, { memo, useState } from "react";
-import { Handle, NodeToolbar, Position, useNodesState } from "reactflow";
+import { memo, useState } from "react";
+import { Handle, NodeProps, Position } from "reactflow";
 import { MyNode } from "./dataMapper";
 import { cn } from "./lib/utils";
 import {
@@ -16,7 +16,7 @@ import { useDrag } from "@use-gesture/react";
 
 const route = getRouteApi("/");
 
-function CustomNode({ data }: MyNode) {
+function CustomNode({ data }: NodeProps<MyNode>) {
   const navigate = useNavigate();
   const search = route.useSearch();
 

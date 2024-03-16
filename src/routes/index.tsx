@@ -1,5 +1,5 @@
 import DataProvider from "@/DataProvider";
-import { diagramInputSchema } from "@/userInputSchema";
+import { diagramInputSchema } from "@/diagramInputSchema";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({

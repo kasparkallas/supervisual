@@ -1,101 +1,145 @@
 import { AllRelevantEntitiesQuery } from "subgraph";
 import { Address, getAddress } from "viem";
 import { Node, Edge } from "reactflow";
-import { uniqBy } from "lodash";
-import { shortenHex } from "./lib/shortenHex";
 import { Label } from "@dagrejs/dagre";
+import { groupBy, uniqBy } from "lodash";
+import { shortenHex } from "./lib/shortenHex";
 
-export type MyNode = Omit<
-  Node<{
-    chain?: number; // todo: clean-up
-    address: Address;
-    isPool?: boolean;
-    isSelected?: boolean;
-    label?: string; // todo: move this
-    isSuperApp?: boolean;
-  }>,
-  "position"
-> &
+export type MyNode = Node<{
+  chain?: number;
+  address: Address;
+  isPool?: boolean;
+  isSelected?: boolean;
+  label: string;
+  isSuperApp?: boolean;
+}> &
   Label;
+
+export type PartialNode = {
+  id: string;
+  data: Partial<MyNode["data"]>;
+};
+
 export type MyEdge = Edge<{
   flowRate: bigint;
 }>;
 
 export const dataMapper = (
+  chain: number,
   accounts: Address[],
-  data: AllRelevantEntitiesQuery,
+  data: AllRelevantEntitiesQuery, // all data lower-cased
 ) => {
-  const nodesFromAddresses: MyNode[] = accounts.map((x) => ({
+  return { nodes: mapNodes(chain, accounts, data), edges: mapEdges(data) };
+};
+
+function mapNodes(
+  chain: number,
+  selectedAccounts: Address[],
+  data: AllRelevantEntitiesQuery,
+): MyNode[] {
+  const nodesFromAddresses: PartialNode[] = selectedAccounts.map((x) => ({
     id: x,
     data: {
-      address: getAddress(x),
+      isSelected: true,
     },
   }));
 
-  const nodesFromPoolMembers: MyNode[] = data.poolMembers
+  const nodesFromPoolMembers: PartialNode[] = data.poolMembers
     .map((x) => [
       {
         id: x.pool.id,
         data: {
-          address: getAddress(x.pool.id),
           isPool: true,
         },
       },
       ...x.pool.poolDistributors.map((y) => ({
         id: y.account.id,
         data: {
-          address: getAddress(y.account.id),
           isSuperApp: x.account.isSuperApp,
         },
       })),
     ])
     .flat();
 
-  const nodesFromPoolDistributors: MyNode[] = data.poolDistributors
+  const nodesFromPoolDistributors: PartialNode[] = data.poolDistributors
     .map((x) => [
       {
         id: x.pool.id,
         data: {
-          address: getAddress(x.pool.id),
           isPool: true,
         },
       },
       {
         id: x.account.id,
         data: {
-          address: getAddress(x.account.id),
           isSuperApp: x.account.isSuperApp,
         },
       },
     ])
     .flat();
 
-  const nodesFromStreams: MyNode[] = data.streams
+  const nodesFromStreams: PartialNode[] = data.streams
     .map((x) => [
       {
         id: x.receiver.id,
         data: {
-          address: getAddress(x.receiver.id),
           isSuperApp: x.receiver.isSuperApp,
         },
       },
       {
         id: x.sender.id,
         data: {
-          address: getAddress(x.sender.id),
           isSuperApp: x.sender.isSuperApp,
         },
       },
     ])
     .flat();
 
-  const nodes: MyNode[] = [
+  const nodesButRedundant: PartialNode[] = [
     ...nodesFromAddresses,
     ...nodesFromPoolMembers,
     ...nodesFromPoolDistributors,
     ...nodesFromStreams,
   ];
 
+  const uniqMergedNodes = Object.entries(
+    groupBy(nodesButRedundant, (x) => x.id),
+  ).map(([, nodeFromDifferentSources]) => {
+    const root = nodeFromDifferentSources[0];
+    if (nodeFromDifferentSources.length === 1) {
+      return root;
+    }
+
+    return {
+      ...root,
+      data: {
+        ...root.data,
+        isPool: nodeFromDifferentSources.some((x) => x.data.isPool),
+        isSuperApp: nodeFromDifferentSources.some((x) => x.data.isSuperApp),
+        isSelected: nodeFromDifferentSources.some((x) => x.data.isSelected),
+      },
+    };
+  });
+
+  const nodesWithFullData: MyNode[] = uniqMergedNodes.map((node) => {
+    const address = getAddress(node.id);
+    return {
+      ...node,
+      data: {
+        ...node.data,
+        chain,
+        address,
+        label: shortenHex(address),
+      },
+      type: "custom",
+      position: { x: 0, y: 0 },
+    };
+  });
+
+  return nodesWithFullData;
+}
+
+function mapEdges(data: AllRelevantEntitiesQuery) {
   const edgesFromPoolDistributors: MyEdge[] = data.poolDistributors
     .map((x) => [
       {
@@ -153,5 +197,16 @@ export const dataMapper = (
     ...edgesFromPoolDistributors,
   ];
 
-  return { nodes, edges };
-};
+  const uniqEdges = uniqBy(edges, (x) => x.id); // todo: should sum the flow rates
+
+  const edgesWithFullData = uniqEdges.map((x) => ({
+    ...x,
+    animated: uniqEdges.length < 75,
+    type: "floating",
+    style: {
+      strokeWidth: 3,
+    },
+  }));
+
+  return edgesWithFullData;
+}

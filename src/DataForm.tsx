@@ -12,7 +12,7 @@ import {
 import { Input } from "./components/ui/input";
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
-import { ethereumAddressCollectionSchema } from "./userInputSchema";
+import { ethereumAddressCollectionSchema } from "./diagramInputSchema";
 import { Address } from "viem";
 import {
   Select,

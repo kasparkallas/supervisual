@@ -13,19 +13,13 @@ import {
 } from "@/components/ui/dialog";
 
 import { useQuery } from "@tanstack/react-query";
-import { DiagramInput } from "./userInputSchema";
+import { DiagramInput } from "./diagramInputSchema";
 import { Button } from "./components/ui/button";
 import { DataForm } from "./DataForm";
 import { groupBy, memoize, uniqBy } from "lodash";
 import { shortenHex } from "./lib/shortenHex";
 import { Address, getAddress } from "viem";
 import sfMeta from "@superfluid-finance/metadata";
-import { deepmerge } from "@fastify/deepmerge";
-import { mergeDeep } from "./mergeDeep";
-
-// const deepmerger = deepmerge({
-//   all: true
-// });
 
 const graphSDK = memoize((chain: number) => {
   const metadata = sfMeta.getNetworkByChainId(chain);
@@ -51,91 +45,16 @@ function DataProvider({ chain, tokens, accounts }: Props) {
     enabled: hasEnoughInput,
   });
 
-  // const queryResults = useQueries({
-  //   queries: hasEnoughInput
-  //     ? accounts.map((account) => ({
-  //       queryKey: [account, token],
-  //       queryFn: () =>
-  //         graphSDK.AllRelevantEntities({
-  //           account: account,
-  //           token: token,
-  //         }),
-  //     }))
-  //     : [],
-  // });
-
-  // console.log(queryResults);
-
-  // todo: clean-up
   const results = data
     ? (() => {
-        const { nodes, edges } = dataMapper(accounts, data);
-
-        const uniqNodes = Object.entries(groupBy(nodes, (x) => x.id)).map(
-          (x) => {
-            return {
-              ...x[1][0],
-              data: {
-                ...x[1][0].data,
-                isPool: x[1].some((y) => y.data.isPool),
-                isSuperApp: x[1].some((y) => y.data.isSuperApp),
-              },
-            };
-          },
-        );
-
-        // uniqBy(nodes, (x) => x.id);
-        const uniqEdges = uniqBy(edges, (x) => x.id); // todo: should sum the flow rates
+        const { nodes, edges } = dataMapper(chain, accounts, data);
 
         return {
-          nodes: uniqNodes.map((node) => {
-            const isSelected = accounts
-              .map((x) => x.toLowerCase())
-              .includes(node.data.address.toLowerCase() as Address);
-            return {
-              ...node,
-              data: {
-                ...node.data,
-                isSelected,
-                chain,
-                label: shortenHex(node.data.address),
-              },
-              type: "custom",
-              position: { x: 0, y: 0 },
-            };
-          }),
-          edges: uniqEdges.map((x) => ({
-            ...x,
-            animated: uniqEdges.length < 75,
-            type: "floating",
-            style: {
-              strokeWidth: 3,
-            },
-            // markerEnd: {
-            //   type: MarkerType.Arrow,
-            //   width: 20,
-            //   height: 20,
-            // }
-          })),
+          nodes,
+          edges,
         };
       })()
     : undefined;
-
-  // !queryResults.some((x) => !x.data)
-  //   ? queryResults
-  //     .map((x) => x.data)
-  //     .flat()
-  //     .map((x) => dataMapper(accounts[0], x!))
-  //     .reduce(
-  //       (acc, curr) => {
-  //         return {
-  //           nodes: uniqBy([...acc.nodes, ...curr.nodes], (x) => x.id),
-  //           edges: uniqBy([...acc.edges, ...curr.edges], (x) => x.id),
-  //         };
-  //       },
-  //       { nodes: [], edges: [] },
-  //     )
-  //   : undefined;
 
   // todo: handle loading better
 

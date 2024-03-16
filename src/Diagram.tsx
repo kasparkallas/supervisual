@@ -32,8 +32,6 @@ const edgeTypes = {
   floating: FloatingEdge as any, // todo: types
 };
 
-// const nodeOrigin: NodeOrigin = [0.5, 0.5]; // what is this?
-
 const proOptions: ProOptions = { account: "paid-pro", hideAttribution: true };
 
 function Diagram(props: Props) {
@@ -51,8 +49,8 @@ function Diagram(props: Props) {
   useForceLayout(props.nodes.length < 75);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(
-    layoutedElements.nodes as any,
-  ); // todo: fix types
+    layoutedElements.nodes,
+  );
 
   const [edges, setEdges, onEdgesChange] = useEdgesState(
     layoutedElements.edges,
@@ -71,59 +69,16 @@ function Diagram(props: Props) {
       onEdgesChange={onEdgesChange}
       proOptions={proOptions}
       onConnect={onConnect}
-      // onPaneClick={onPaneClick}
-      // nodeOrigin={nodeOrigin}
       nodeTypes={nodeTypes}
       fitView
       edgeTypes={edgeTypes}
       connectionLineComponent={FloatingConnectionLine as any} // todo: types
       minZoom={0.1}
-      // defaultViewport={{
-      //   x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0,
-      //   y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0,
-      //   zoom: 0,
-      // }}
     >
       <Background />
       <Controls />
-      {/* <MiniMap /> */}
     </ReactFlow>
   );
 }
 
 export default Diagram;
-
-// # Dagre stuff
-// const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
-
-// const getLayoutedElements = (
-//   nodes: MyNode[],
-//   edges: MyEdge[],
-// ): {
-//   nodes: Node[];
-//   edges: Edge[];
-// } => {
-//   if (!nodes.length) {
-//     return { nodes: [], edges };
-//   }
-
-//   g.setGraph({
-//     rankdir: "TB",
-//     nodesep: 200,
-//     ranksep: 300,
-//     ranker: "longest-path",
-//   });
-
-//   edges.forEach((edge) => g.setEdge(edge.source, edge.target));
-//   nodes.forEach((node) => g.setNode(node.id, node));
-
-//   Dagre.layout(g);
-
-//   return {
-//     nodes: nodes.map((node) => {
-//       const { x, y } = g.node(node.id);
-//       return { ...node, position: { x, y } };
-//     }),
-//     edges,
-//   };
-// };

@@ -15,6 +15,7 @@ type SimNodeType = SimulationNodeDatum & Node;
 
 const elementCountSelector = (state: ReactFlowState) =>
   state.nodeInternals.size + state.edges.length;
+
 const nodesInitializedSelector = (state: ReactFlowState) =>
   Array.from(state.nodeInternals.values()).every(
     (node) => node.width && node.height,

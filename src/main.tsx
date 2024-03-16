@@ -8,7 +8,6 @@ import {
 } from "@tanstack/react-router";
 import qs from "query-string";
 
-// Import the generated route tree
 import { routeTree } from "./routeTree.gen";
 
 const customStringifier: SearchSerializer = (
