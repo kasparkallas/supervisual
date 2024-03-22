@@ -25609,13 +25609,6 @@ export async function getMeshOptions(): Promise<GetMeshOptions> {
           },
           location: "AllRelevantEntitiesDocument.graphql",
         },
-        {
-          document: CurrentBlockDocument,
-          get rawSDL() {
-            return printWithCache(CurrentBlockDocument);
-          },
-          location: "CurrentBlockDocument.graphql",
-        },
       ];
     },
     fetchFn,
@@ -25739,11 +25732,6 @@ export type AllRelevantEntitiesQuery = {
       | "updatedAtTimestamp"
     >
   >;
-};
-
-export type CurrentBlockQueryVariables = Exact<{ [key: string]: never }>;
-
-export type CurrentBlockQuery = {
   _meta?: Maybe<{ block: Pick<_Block_, "number" | "timestamp"> }>;
 };
 
@@ -25837,21 +25825,17 @@ export const AllRelevantEntitiesDocument = gql`
       updatedAtBlockNumber
       updatedAtTimestamp
     }
-  }
-` as unknown as DocumentNode<
-  AllRelevantEntitiesQuery,
-  AllRelevantEntitiesQueryVariables
->;
-export const CurrentBlockDocument = gql`
-  query CurrentBlock {
-    _meta {
+    _meta(block: $block) {
       block {
         number
         timestamp
       }
     }
   }
-` as unknown as DocumentNode<CurrentBlockQuery, CurrentBlockQueryVariables>;
+` as unknown as DocumentNode<
+  AllRelevantEntitiesQuery,
+  AllRelevantEntitiesQueryVariables
+>;
 
 export type Requester<C = {}, E = unknown> = <R, V>(
   doc: DocumentNode,
@@ -25872,16 +25856,6 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
         variables,
         options,
       ) as Promise<AllRelevantEntitiesQuery>;
-    },
-    CurrentBlock(
-      variables?: CurrentBlockQueryVariables,
-      options?: C,
-    ): Promise<CurrentBlockQuery> {
-      return requester<CurrentBlockQuery, CurrentBlockQueryVariables>(
-        CurrentBlockDocument,
-        variables,
-        options,
-      ) as Promise<CurrentBlockQuery>;
     },
   };
 }

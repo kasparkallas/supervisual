@@ -95,4 +95,10 @@ query AllRelevantEntities(
     updatedAtBlockNumber
     updatedAtTimestamp
   }
+  _meta {
+    block {
+      number
+      timestamp
+    }
+  }
 }

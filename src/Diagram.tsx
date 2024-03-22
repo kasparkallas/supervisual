@@ -53,19 +53,19 @@ function Diagram(props: Props) {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
-  useEffect(() => {
-    if (props.nodes.length) {
-      const { nodes, edges } = dagreLayout(props.nodes, props.edges, {
-        direction: "TB",
-        spacing: [200, 300],
-      });
-      setNodes(nodes);
-      setEdges(edges);
-    } else {
-      setNodes([]);
-      setEdges([]);
-    }
-  }, [props.nodes, props.edges, setNodes, setEdges]);
+  // useEffect(() => {
+  //   if (props.nodes.length) {
+  //     const { nodes, edges } = dagreLayout(props.nodes, props.edges, {
+  //       direction: "TB",
+  //       spacing: [200, 300],
+  //     });
+  //     setNodes(nodes);
+  //     setEdges(edges);
+  //   } else {
+  //     setNodes([]);
+  //     setEdges([]);
+  //   }
+  // }, [props.nodes, props.edges, setNodes, setEdges]);
 
   useForceLayout(props.nodes.length < 75);
 
@@ -83,7 +83,7 @@ function Diagram(props: Props) {
       minZoom={0.1}
     >
       <Background />
-      <Controls />
+      {/* <Controls /> */}
     </ReactFlow>
   );
 }

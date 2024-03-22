@@ -62,9 +62,12 @@ declare module "@tanstack/react-router" {
 }
 
 import "./index.css";
+import { ReactFlowProvider } from "reactflow";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <ReactFlowProvider>
+      <RouterProvider router={router} />
+    </ReactFlowProvider>
   </React.StrictMode>,
 );

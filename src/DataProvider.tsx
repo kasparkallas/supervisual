@@ -2,7 +2,7 @@ import { getBuiltGraphSDK } from "subgraph";
 
 import Diagram from "./Diagram";
 import { Panel, ReactFlowProvider } from "reactflow";
-import { dataMapper } from "./dataMapper";
+import { MyMappedData, dataMapper } from "./dataMapper";
 import {
   Dialog,
   DialogContent,
@@ -58,13 +58,9 @@ function DataProvider({ chain, tokens, accounts, block }: Props) {
     placeholderData: keepPreviousData,
   });
 
-  const results = useMemo(() => {
+  const mappedData: MyMappedData = useMemo(() => {
     if (data) {
-      const { nodes, edges } = dataMapper(chain, accounts, data);
-      return {
-        nodes,
-        edges,
-      };
+      return dataMapper(chain, accounts, data);
     } else {
       return {
         nodes: [],
@@ -80,7 +76,7 @@ function DataProvider({ chain, tokens, accounts, block }: Props) {
   const key = useMemo(() => Date.now(), [data]);
 
   return (
-    <ReactFlowProvider>
+    <>
       <Panel position="top-left" className="flex items-center gap-6">
         {/* <div className="flex items-center gap-6"> */}
         <Dialog>
@@ -95,10 +91,10 @@ function DataProvider({ chain, tokens, accounts, block }: Props) {
         {/* </div> */}
       </Panel>
       <Panel position="bottom-center">
-        <BlockSlider block={block} nodes={results.nodes} />
+        <BlockSlider block={block} {...mappedData} />
       </Panel>
-      <Diagram key={key} nodes={results.nodes} edges={results.edges} />
-    </ReactFlowProvider>
+      <Diagram key={key} nodes={mappedData.nodes} edges={mappedData.edges} />
+    </>
   );
 }
 

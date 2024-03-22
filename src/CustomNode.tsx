@@ -15,16 +15,12 @@ import * as HoverCardPrimitive from "@radix-ui/react-hover-card";
 
 const route = getRouteApi("/");
 
-function CustomNode({ dragging, data }: NodeProps<MyNode>) {
+function CustomNode({ dragging, selected, data }: NodeProps<MyNode>) {
   const navigate = useNavigate();
   const search = route.useSearch();
 
   return (
-    <HoverCard
-      openDelay={500}
-      closeDelay={0}
-      open={dragging ? false : undefined}
-    >
+    <HoverCard open={!dragging && selected}>
       <HoverCardTrigger>
         <div
           className={cn(

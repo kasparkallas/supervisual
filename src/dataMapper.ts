@@ -4,6 +4,7 @@ import { Node, Edge } from "reactflow";
 import { Label } from "@dagrejs/dagre";
 import { groupBy, uniqBy } from "lodash";
 import { shortenHex } from "./lib/shortenHex";
+import { fromUnixTime } from "date-fns";
 
 export type MyNode = Node<{
   chain?: number;
@@ -35,12 +36,28 @@ export type MyEdge = Edge<{
   flowRate: bigint;
 }>;
 
+export type MyMappedData = {
+  nodes: MyNode[];
+  edges: MyEdge[];
+  latestBlock?: {
+    number: number;
+    timestamp: Date;
+  };
+};
+
 export const dataMapper = (
   chain: number,
   accounts: Address[],
   data: AllRelevantEntitiesQuery, // all data lower-cased
-) => {
-  return { nodes: mapNodes(chain, accounts, data), edges: mapEdges(data) };
+): MyMappedData => {
+  return {
+    nodes: mapNodes(chain, accounts, data),
+    edges: mapEdges(data),
+    latestBlock: {
+      number: Number(data._meta!.block.number),
+      timestamp: fromUnixTime(data._meta!.block.timestamp!),
+    },
+  };
 };
 
 function mapNodes(

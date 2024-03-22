@@ -3,38 +3,41 @@ import { Slider } from "./components/ui/slider";
 import sfMeta from "@superfluid-finance/metadata";
 import { useQuery } from "@tanstack/react-query";
 import { graphSDK } from "./DataProvider";
-import { MyNode } from "./dataMapper";
+import { MyMappedData, MyNode } from "./dataMapper";
 import { useEffect, useMemo, useState } from "react";
 import { maxBy, minBy } from "lodash";
 import { cn } from "./lib/utils";
+import {
+  format,
+  formatDuration,
+  fromUnixTime,
+  intervalToDuration,
+} from "date-fns";
 
 const route = getRouteApi("/");
 
 type Props = {
-  // chain: number;
   block: number | null;
-  nodes: MyNode[];
-};
+} & MyMappedData;
 
-export function BlockSlider({ block, nodes }: Props) {
+export function BlockSlider({ block, nodes, latestBlock }: Props) {
   const navigate = useNavigate();
   const search = route.useSearch();
-
-  // const metadata = sfMeta.getNetworkByChainId(chain)!;
-
-  // const { data } = useQuery({
-  //     queryKey: ["chain", chain],
-  //     queryFn: () =>
-  //         graphSDK(chain).CurrentBlock(),
-  // });
 
   const { min, max, averageBlockTime } = useMemo(() => {
     if (!nodes.length) {
       return { min: 0, max: 0, averageBlockTime: 0 };
     }
 
-    const earliestNode = minBy(nodes, (x) => x.data.createdAtBlockNumber)!;
-    const latestNode = maxBy(nodes, (x) => x.data.updatedAtBlockNumber)!;
+    const selectedNodes = nodes.filter((x) => x.data.isSelected);
+    const earliestNode = minBy(
+      selectedNodes,
+      (x) => x.data.createdAtBlockNumber,
+    )!;
+    const latestNode = maxBy(
+      selectedNodes,
+      (x) => x.data.updatedAtBlockNumber,
+    )!;
 
     const min = earliestNode.data.createdAtBlockNumber;
     const max = latestNode.data.updatedAtBlockNumber;
@@ -51,35 +54,70 @@ export function BlockSlider({ block, nodes }: Props) {
     return { min, max, averageBlockTime };
   }, [nodes, block]);
 
-  // if (!data) {
-  //     return null;
-  // }
-
   // todo: handle wierd case where the input block is outside the range
-  const defaultValue = block ? Math.min(block ?? max) : max;
-  // const max = data._meta!.block.number;
-  // const min = metadata.startBlockV1;
+  const defaultBlock = block ? Math.min(block ?? max) : max;
 
-  const [pendingValue, setPendingValue] = useState<number | undefined>(
+  const [pendingBlock, setPendingValue] = useState<number | undefined>(
     undefined,
   );
-  const visibleValue = pendingValue ?? defaultValue;
+  const visibleBlock = pendingBlock ?? defaultBlock;
 
-  const timeAgo = (defaultValue - visibleValue) * averageBlockTime;
+  const timeAgo = (defaultBlock - visibleBlock) * averageBlockTime;
+
+  // const isNon
+  // const queryDate = useMemo(() => {
+  //     if (latestBlock?.number) {
+  //         return fromUnixTime(meta.block.timestamp);
+  //     }
+  // }, [latestBlock]);
+
+  const timeAgoText = useMemo(() => {
+    const durationFormatted = formatDuration(
+      intervalToDuration({ start: 0, end: Math.abs(timeAgo * 1000) }),
+      {
+        zero: false,
+        format: ["years", "months", "days", "hours"],
+      },
+    );
+    return `${durationFormatted}`;
+  }, [timeAgo]);
 
   return (
     <div
       className={cn(
-        "flex min-w-96 items-center gap-3",
+        "flex min-w-96 flex-col gap-3",
         averageBlockTime === 0 ? "invisible" : "",
       )}
     >
+      <p className="w-max text-sm">
+        {visibleBlock === max
+          ? `Block ${visibleBlock} (latest)`
+          : `Block ${visibleBlock}`}
+        <span
+          className={cn(
+            "ml-1 text-xs",
+            visibleBlock === defaultBlock ? "invisibile" : "",
+          )}
+        >
+          {/* {formatDuration(intervalToDuration({ end: 0, start: timeAgo * 1000 }), {
+                        zero: false,
+                        format: ["years", "months", "days", "hours"],
+                    })} */}
+
+          {/* {
+                        format(queryDate, "yyyy-MM-dd HH:mm:ss")
+                    } */}
+
+          {/* {visibleValue !== defaultValue
+                        ? `(~${timeAgo > 0 ? `${timeAgo} seconds ago` : `${Math.abs(timeAgo)} seconds later`})`
+                        : ""} */}
+        </span>
+      </p>
       <Slider
         key={`${min}-${max}`}
-        className="w-3/4"
         min={min}
         max={max}
-        defaultValue={[defaultValue]}
+        defaultValue={[defaultBlock]}
         step={1}
         onValueChange={([value]) => setPendingValue(value)}
         onValueCommit={([newValue]) => {
@@ -98,19 +136,6 @@ export function BlockSlider({ block, nodes }: Props) {
           setPendingValue(undefined);
         }}
       />
-      <p className="w-1/4 text-sm">
-        {visibleValue === max ? "Latest" : visibleValue}
-        <span
-          className={cn(
-            "ml-1 text-xs",
-            visibleValue === defaultValue ? "invisibile" : "",
-          )}
-        >
-          {visibleValue !== defaultValue
-            ? `(~${timeAgo > 0 ? `${timeAgo} seconds ago` : `${Math.abs(timeAgo)} seconds later`})`
-            : ""}
-        </span>
-      </p>
     </div>
   );
 }
