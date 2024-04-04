@@ -25745,7 +25745,11 @@ export const AllRelevantEntitiesDocument = gql`
     poolDistributors(
       block: $block
       first: 1000
-      where: { account_in: $accounts, pool_: { token_in: $tokens } }
+      where: {
+        account_in: $accounts
+        pool_: { token_in: $tokens }
+        flowRate_not: "0"
+      }
     ) {
       createdAtBlockNumber
       createdAtTimestamp
@@ -25767,7 +25771,15 @@ export const AllRelevantEntitiesDocument = gql`
         }
       }
     }
-    poolMembers(block: $block, first: 1000, where: { account_in: $accounts }) {
+    poolMembers(
+      block: $block
+      first: 1000
+      where: {
+        account_in: $accounts
+        units_not: "0"
+        pool_: { flowRate_not: "0" }
+      }
+    ) {
       createdAtBlockNumber
       createdAtTimestamp
       updatedAtBlockNumber
@@ -25795,8 +25807,8 @@ export const AllRelevantEntitiesDocument = gql`
       first: 1000
       where: {
         or: [
-          { receiver_in: $accounts, token_in: $tokens }
-          { sender_in: $accounts, token_in: $tokens }
+          { receiver_in: $accounts, token_in: $tokens, currentFlowRate_gt: 0 }
+          { sender_in: $accounts, token_in: $tokens, currentFlowRate_gt: 0 }
         ]
       }
     ) {
@@ -25825,7 +25837,7 @@ export const AllRelevantEntitiesDocument = gql`
       updatedAtBlockNumber
       updatedAtTimestamp
     }
-    _meta(block: $block) {
+    _meta {
       block {
         number
         timestamp

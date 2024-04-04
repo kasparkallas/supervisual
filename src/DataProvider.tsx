@@ -19,7 +19,7 @@ import { DataForm } from "./DataForm";
 import { memoize } from "lodash";
 import sfMeta from "@superfluid-finance/metadata";
 import { BlockSlider } from "./BlockSlider";
-import { useId, useMemo } from "react";
+import { useId, useMemo, useState } from "react";
 
 export const graphSDK = memoize((chain: number) => {
   const metadata = sfMeta.getNetworkByChainId(chain);
@@ -75,17 +75,28 @@ function DataProvider({ chain, tokens, accounts, block }: Props) {
 
   const key = useMemo(() => Date.now(), [data]);
 
+  const [open, setOpen] = useState(false);
+
   return (
     <>
       <Panel position="top-left" className="flex items-center gap-6">
         {/* <div className="flex items-center gap-6"> */}
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button className="scale-95 rounded-full shadow-lg shadow-neutral-400 transition-transform hover:scale-100">
               Configure Selection
             </Button>
           </DialogTrigger>
-          <FormDialogContent />
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Configure Selection</DialogTitle>
+              <DialogDescription>
+                The network, tokens and accounts you select will be used for the
+                diagram.
+              </DialogDescription>
+            </DialogHeader>
+            <DataForm onSubmit={() => setOpen(false)} />
+          </DialogContent>
         </Dialog>
 
         {/* </div> */}
@@ -99,18 +110,3 @@ function DataProvider({ chain, tokens, accounts, block }: Props) {
 }
 
 export default DataProvider;
-
-const FormDialogContent = () => {
-  return (
-    <DialogContent className="sm:max-w-[425px]">
-      <DialogHeader>
-        <DialogTitle>Configure Selection</DialogTitle>
-        <DialogDescription>
-          The network, tokens and accounts you select will be used for the
-          diagram.
-        </DialogDescription>
-      </DialogHeader>
-      <DataForm />
-    </DialogContent>
-  );
-};

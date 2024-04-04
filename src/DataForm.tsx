@@ -49,7 +49,7 @@ const mapAddressesIntoFieldArray = (addresses: Address[]) => {
 
 const route = getRouteApi("/");
 
-export function DataForm() {
+export function DataForm(props: { onSubmit: () => void }) {
   const navigate = useNavigate();
   const search = route.useSearch();
 
@@ -76,6 +76,7 @@ export function DataForm() {
     navigate({
       search: { ...values, block: search.block },
     });
+    props.onSubmit();
   }
 
   return (

@@ -6,8 +6,10 @@ const dagreGraph = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
 const dagreLayout: LayoutAlgorithm = (nodes, edges, options) => {
   dagreGraph.setGraph({
     rankdir: options.direction,
+    // align: "UR",
     nodesep: options.spacing[0],
     ranksep: options.spacing[1],
+    acyclicer: "greedy",
   });
 
   for (const node of nodes) {

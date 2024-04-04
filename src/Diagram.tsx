@@ -19,18 +19,23 @@ type Props = {
   edges: MyEdge[];
 };
 
-import CustomNode from "./CustomNode";
+import CustomNode, { CustomNode2 } from "./CustomNode";
 import dagreLayout from "./auto-layout/algorithms/dagre";
 import FloatingEdge from "./floating-edge/FloatingEdge";
 import FloatingConnectionLine from "./floating-edge/FloatingConnectionLine";
 import useAutoLayout from "./auto-layout/useAutoLayout";
+import CustomEdge from "./CustomEdge";
 
 const nodeTypes = {
   custom: CustomNode,
 };
 
+// const edgeTypes = {
+//   floating: FloatingEdge as any, // todo: types
+// };
+
 const edgeTypes = {
-  floating: FloatingEdge as any, // todo: types
+  floating: CustomEdge as any, // todo: types
 };
 
 const proOptions: ProOptions = { account: "paid-pro", hideAttribution: true };
@@ -42,7 +47,7 @@ function Diagram(props: Props) {
     if (props.nodes.length) {
       const { nodes, edges } = dagreLayout(props.nodes, props.edges, {
         direction: "TB",
-        spacing: [200, 300],
+        spacing: [125, 250],
       });
       return { nodes, edges };
     } else {
@@ -67,7 +72,7 @@ function Diagram(props: Props) {
   //   }
   // }, [props.nodes, props.edges, setNodes, setEdges]);
 
-  useForceLayout(props.nodes.length < 75);
+  // useForceLayout(props.nodes.length < 75);
 
   return (
     <ReactFlow
@@ -77,9 +82,10 @@ function Diagram(props: Props) {
       onEdgesChange={onEdgesChange}
       proOptions={proOptions}
       nodeTypes={nodeTypes}
-      fitView
       edgeTypes={edgeTypes}
-      connectionLineComponent={FloatingConnectionLine as any} // todo: types
+      fitView
+      // edgeTypes={edgeTypes}
+      // connectionLineComponent={FloatingConnectionLine as any} // todo: types
       minZoom={0.1}
     >
       <Background />

@@ -38,6 +38,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.51.0",
+    "react-jazzicon": "^1.0.4",
     "reactflow": "^11.10.3",
     "subgraph": "workspace:*",
     "tailwind-merge": "^2.2.1",

@@ -25,15 +25,16 @@ export function BlockSlider({ block, nodes, latestBlock }: Props) {
   const search = route.useSearch();
 
   const { min, max, averageBlockTime } = useMemo(() => {
-    if (!nodes.length) {
+    const selectedNodes = nodes.filter((x) => x.data.isSelected);
+    if (!selectedNodes.length) {
       return { min: 0, max: 0, averageBlockTime: 0 };
     }
 
-    const selectedNodes = nodes.filter((x) => x.data.isSelected);
     const earliestNode = minBy(
       selectedNodes,
       (x) => x.data.createdAtBlockNumber,
     )!;
+
     const latestNode = maxBy(
       selectedNodes,
       (x) => x.data.updatedAtBlockNumber,

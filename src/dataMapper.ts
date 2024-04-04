@@ -73,6 +73,7 @@ function mapNodes(
       createdAtTimestamp: Number(x.createdAtTimestamp),
       updatedAtBlockNumber: Number(x.updatedAtBlockNumber),
       updatedAtTimestamp: Number(x.updatedAtTimestamp),
+      isSelected: true,
     },
   }));
 
@@ -158,9 +159,6 @@ function mapNodes(
     ...nodesFromStreams,
   ];
 
-  const selectedAccountsMap = new Map(
-    selectedAccounts.map((x) => [x.toLowerCase(), true]),
-  );
   const uniqMergedNodes = Object.entries(
     groupBy(nodesButRedundant, (x) => x.id),
   ).map(([, nodeFromDifferentSources]) => {
@@ -175,7 +173,10 @@ function mapNodes(
         ...root.data,
         isPool: nodeFromDifferentSources.some((x) => x.data.isPool),
         isSuperApp: nodeFromDifferentSources.some((x) => x.data.isSuperApp),
-        isSelected: selectedAccountsMap.has(root.id),
+        isSelected: nodeFromDifferentSources.reduce(
+          (acc, curr) => acc || Boolean(curr.data.isSelected),
+          false,
+        ),
         createdAtBlockNumber: Math.min(
           ...nodeFromDifferentSources.map((x) => x.data.createdAtBlockNumber),
         ),
@@ -262,13 +263,31 @@ function mapEdges(data: AllRelevantEntitiesQuery) {
     ])
     .flat();
 
-  const edges: MyEdge[] = [
+  const edgesButRedundant: MyEdge[] = [
     ...edgesFromPoolMembers,
     ...edgesFromStreams,
     ...edgesFromPoolDistributors,
   ];
 
-  const uniqEdges = uniqBy(edges, (x) => x.id); // todo: should sum the flow rates
+  const uniqEdges = Object.entries(groupBy(edgesButRedundant, (x) => x.id)).map(
+    ([, edgesFromDifferentSources]) => {
+      const root = edgesFromDifferentSources[0];
+      if (edgesFromDifferentSources.length === 1) {
+        return root;
+      }
+
+      return {
+        ...root,
+        data: {
+          ...root.data,
+          flowRate: edgesFromDifferentSources.reduce(
+            (acc, x) => acc + BigInt(x.data?.flowRate ?? 0),
+            0n,
+          ),
+        },
+      };
+    },
+  );
 
   const edgesWithFullData = uniqEdges.map((x) => ({
     ...x,
