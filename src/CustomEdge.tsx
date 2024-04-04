@@ -6,6 +6,7 @@ import {
 } from "reactflow";
 import { MyEdge } from "./dataMapper";
 import { formatEther } from "viem";
+import { useMemo } from "react";
 
 export default function CustomEdge({
   id,
@@ -15,7 +16,7 @@ export default function CustomEdge({
   targetY,
   selected,
   data,
-}: EdgeProps) {
+}: EdgeProps<MyEdge["data"]>) {
   const [edgePath, labelX, labelY] = getStraightPath({
     sourceX,
     sourceY,
@@ -23,7 +24,12 @@ export default function CustomEdge({
     targetY,
   });
 
-  const { flowRate } = (data as MyEdge["data"]) ?? { flowRate: 0n };
+  const { token, flowRate } = data!; // todo: bang
+
+  const flowRatePerDayString = useMemo(() => {
+    const flowRatePerDay = flowRate * 86400n;
+    return `${formatEther(flowRatePerDay)} ${token.symbol}/day`;
+  }, [flowRate, token]);
 
   return (
     <>
@@ -31,7 +37,7 @@ export default function CustomEdge({
         id={id}
         path={edgePath}
         style={{
-          strokeWidth: 3,
+          strokeWidth: 5,
         }}
       />
       {selected && (
@@ -49,7 +55,7 @@ export default function CustomEdge({
             }}
             className="nodrag nopan bg-neutral-50"
           >
-            {formatEther(flowRate)}/sec
+            {flowRatePerDayString}
           </div>
         </EdgeLabelRenderer>
       )}

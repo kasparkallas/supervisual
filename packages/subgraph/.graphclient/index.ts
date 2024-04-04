@@ -25682,7 +25682,7 @@ export type AllRelevantEntitiesQuery = {
         | "updatedAtBlockNumber"
         | "updatedAtTimestamp"
         | "id"
-      > & { token: Pick<Token, "id"> };
+      > & { token: Pick<Token, "id" | "symbol"> };
     }
   >;
   poolMembers: Array<
@@ -25704,7 +25704,7 @@ export type AllRelevantEntitiesQuery = {
         | "id"
         | "flowRate"
         | "totalUnits"
-      > & { token: Pick<Token, "id"> };
+      > & { token: Pick<Token, "id" | "symbol"> };
     }
   >;
   streams: Array<
@@ -25718,7 +25718,7 @@ export type AllRelevantEntitiesQuery = {
     > & {
       receiver: Pick<Account, "id" | "isSuperApp">;
       sender: Pick<Account, "id" | "isSuperApp">;
-      token: Pick<Token, "id">;
+      token: Pick<Token, "id" | "symbol">;
     }
   >;
   accounts: Array<
@@ -25768,6 +25768,7 @@ export const AllRelevantEntitiesDocument = gql`
         id
         token {
           id
+          symbol
         }
       }
     }
@@ -25799,6 +25800,7 @@ export const AllRelevantEntitiesDocument = gql`
         totalUnits
         token {
           id
+          symbol
         }
       }
     }
@@ -25826,6 +25828,7 @@ export const AllRelevantEntitiesDocument = gql`
       }
       token {
         id
+        symbol
       }
       currentFlowRate
     }

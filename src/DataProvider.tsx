@@ -60,7 +60,7 @@ function DataProvider({ chain, tokens, accounts, block }: Props) {
 
   const mappedData: MyMappedData = useMemo(() => {
     if (data) {
-      return dataMapper(chain, accounts, data);
+      return dataMapper(chain, data);
     } else {
       return {
         nodes: [],

@@ -30,6 +30,7 @@ query AllRelevantEntities(
       id
       token {
         id
+        symbol
       }
     }
   }
@@ -61,6 +62,7 @@ query AllRelevantEntities(
       totalUnits
       token {
         id
+        symbol
       }
     }
   }
@@ -88,6 +90,7 @@ query AllRelevantEntities(
     }
     token {
       id
+      symbol
     }
     currentFlowRate
   }

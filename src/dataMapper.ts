@@ -34,6 +34,10 @@ export type PartialNode = {
 
 export type MyEdge = Edge<{
   flowRate: bigint;
+  token: {
+    id: string;
+    symbol: string;
+  };
 }>;
 
 export type MyMappedData = {
@@ -47,11 +51,10 @@ export type MyMappedData = {
 
 export const dataMapper = (
   chain: number,
-  accounts: Address[],
   data: AllRelevantEntitiesQuery, // all data lower-cased
 ): MyMappedData => {
   return {
-    nodes: mapNodes(chain, accounts, data),
+    nodes: mapNodes(chain, data),
     edges: mapEdges(data),
     latestBlock: {
       number: Number(data._meta!.block.number),
@@ -60,11 +63,7 @@ export const dataMapper = (
   };
 };
 
-function mapNodes(
-  chain: number,
-  selectedAccounts: Address[],
-  data: AllRelevantEntitiesQuery,
-): MyNode[] {
+function mapNodes(chain: number, data: AllRelevantEntitiesQuery): MyNode[] {
   const nodesFromAccounts: PartialNode[] = data.accounts.map((x) => ({
     id: x.id,
     data: {
@@ -211,7 +210,7 @@ function mapNodes(
   return nodesWithFullData;
 }
 
-function mapEdges(data: AllRelevantEntitiesQuery) {
+function mapEdges(data: AllRelevantEntitiesQuery): MyEdge[] {
   const edgesFromPoolDistributors: MyEdge[] = data.poolDistributors
     .map((x) => [
       {
@@ -219,6 +218,10 @@ function mapEdges(data: AllRelevantEntitiesQuery) {
         source: x.account.id,
         target: x.pool.id,
         data: {
+          token: {
+            id: x.pool.token.id,
+            symbol: x.pool.token.symbol,
+          },
           flowRate: BigInt(x.flowRate),
         },
       },
@@ -232,6 +235,10 @@ function mapEdges(data: AllRelevantEntitiesQuery) {
         source: x.pool.id,
         target: x.account.id,
         data: {
+          token: {
+            id: x.pool.token.id,
+            symbol: x.pool.token.symbol,
+          },
           flowRate:
             BigInt(x.units) > 0
               ? (BigInt(x.pool.flowRate) * BigInt(x.pool.totalUnits)) /
@@ -257,6 +264,10 @@ function mapEdges(data: AllRelevantEntitiesQuery) {
         source: x.sender.id,
         target: x.receiver.id,
         data: {
+          token: {
+            id: x.token.id,
+            symbol: x.token.symbol,
+          },
           flowRate: BigInt(x.currentFlowRate),
         },
       },
@@ -269,25 +280,25 @@ function mapEdges(data: AllRelevantEntitiesQuery) {
     ...edgesFromPoolDistributors,
   ];
 
-  const uniqEdges = Object.entries(groupBy(edgesButRedundant, (x) => x.id)).map(
-    ([, edgesFromDifferentSources]) => {
-      const root = edgesFromDifferentSources[0];
-      if (edgesFromDifferentSources.length === 1) {
-        return root;
-      }
+  const uniqEdges: MyEdge[] = Object.entries(
+    groupBy(edgesButRedundant, (x) => x.id),
+  ).map(([, edgesFromDifferentSources]) => {
+    const root = edgesFromDifferentSources[0];
+    if (edgesFromDifferentSources.length === 1) {
+      return root;
+    }
 
-      return {
-        ...root,
-        data: {
-          ...root.data,
-          flowRate: edgesFromDifferentSources.reduce(
-            (acc, x) => acc + BigInt(x.data?.flowRate ?? 0),
-            0n,
-          ),
-        },
-      };
-    },
-  );
+    return {
+      ...root,
+      data: {
+        ...root.data!,
+        flowRate: edgesFromDifferentSources.reduce(
+          (acc, x) => acc + BigInt(x.data?.flowRate ?? 0),
+          0n,
+        ),
+      },
+    };
+  });
 
   const edgesWithFullData = uniqEdges.map((x) => ({
     ...x,
