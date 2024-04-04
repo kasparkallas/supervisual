@@ -38,19 +38,23 @@ export function CustomNode2({ dragging, selected, data }: NodeProps<MyNode>) {
             "rounded-xl border-2 border-stone-600 bg-amber-100 px-4 py-2 shadow-md",
           )}
         >
-          {label}
+          <div className="flex flex-col items-center gap-2">
+            <span className="text-xs">GDA pool</span>
+            {label}
+          </div>
         </div>
       );
     }
 
     if (data.isSuperApp) {
       return (
-        <div className="flex flex-col items-center gap-1">
-          <div
-            className={cn(
-              "rounded-full border-2 border-stone-600 bg-pink-100 px-4 py-2 shadow-md",
-            )}
-          >
+        <div
+          className={cn(
+            "rounded-xl border-2 border-stone-600 bg-pink-100 px-4 py-2 shadow-md",
+          )}
+        >
+          <div className="flex flex-col items-center gap-2">
+            <span className="text-xs">SuperApp</span>
             {label}
           </div>
         </div>
