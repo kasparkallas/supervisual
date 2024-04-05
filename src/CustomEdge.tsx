@@ -7,8 +7,25 @@ import {
   getStraightPath,
 } from "reactflow";
 import { MyEdge } from "./dataMapper";
-import { formatEther } from "viem";
+import { Address, formatEther } from "viem";
 import { useMemo } from "react";
+import { memoize } from "lodash";
+import { FastAverageColor } from "fast-average-color";
+import { extendedSuperTokenList } from "@superfluid-finance/tokenlist";
+import { useQuery } from "@tanstack/react-query";
+
+const fac = new FastAverageColor();
+
+const getTokenAverageColor = memoize((tokenAddress: Address) => {
+  console.log("foo");
+  const addressLowerCased = tokenAddress.toLowerCase();
+  const tokenListEntry = extendedSuperTokenList.tokens.find(
+    (x) => x.address.toLowerCase() === addressLowerCased,
+  );
+  if (tokenListEntry && tokenListEntry.logoURI) {
+    return fac.getColorAsync(tokenListEntry.logoURI);
+  }
+});
 
 export default function CustomEdge({
   id,
@@ -33,6 +50,11 @@ export default function CustomEdge({
     return `${formatEther(flowRatePerDay)} ${token.symbol}/day`;
   }, [flowRate, token]);
 
+  const { data: tokenColor } = useQuery({
+    queryKey: ["tokenAverageColor", token.id],
+    queryFn: () => getTokenAverageColor(token.id as Address),
+  });
+
   return (
     <>
       <BaseEdge
@@ -40,6 +62,7 @@ export default function CustomEdge({
         path={edgePath}
         style={{
           strokeWidth: 4,
+          stroke: tokenColor ? tokenColor.rgb : undefined,
         }}
       />
       {selected && (

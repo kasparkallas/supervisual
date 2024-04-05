@@ -40,6 +40,9 @@ importers:
       "@superfluid-finance/metadata":
         specifier: ^1.1.28
         version: 1.1.28
+      "@superfluid-finance/tokenlist":
+        specifier: ^4.0.0
+        version: 4.0.0
       "@tanstack/react-query":
         specifier: ^5.28.0
         version: 5.28.0(react@18.2.0)
@@ -61,6 +64,9 @@ importers:
       date-fns:
         specifier: ^3.5.0
         version: 3.5.0
+      fast-average-color:
+        specifier: ^9.4.0
+        version: 9.4.0
       graphql:
         specifier: ^16.8.1
         version: 16.8.1
@@ -5592,6 +5598,15 @@ packages:
       }
     dev: false
 
+  /@superfluid-finance/tokenlist@4.0.0:
+    resolution:
+      {
+        integrity: sha512-O6AOuwgE81f/RJ0SYPY4ey9XJ7qelIon8OfkJJb49wt2588z6AwCHoOnYK0iVqh5+7C/Qhm4KrqngG8d55nbUA==,
+      }
+    dependencies:
+      "@uniswap/token-lists": 1.0.0-beta.34
+    dev: false
+
   /@tanstack/history@1.15.13:
     resolution:
       {
@@ -6351,6 +6366,14 @@ packages:
         integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==,
       }
     dev: true
+
+  /@uniswap/token-lists@1.0.0-beta.34:
+    resolution:
+      {
+        integrity: sha512-Hc3TfrFaupg0M84e/Zv7BoF+fmMWDV15mZ5s8ZQt2qZxUcNw2GQW+L6L/2k74who31G+p1m3GRYbJpAo7d1pqA==,
+      }
+    engines: { node: ">=10" }
+    dev: false
 
   /@vitejs/plugin-react@4.2.1(vite@5.1.4):
     resolution:
@@ -8527,6 +8550,14 @@ packages:
       }
     engines: { node: ^12.20 || >= 14.13 }
     dev: true
+
+  /fast-average-color@9.4.0:
+    resolution:
+      {
+        integrity: sha512-bvM8vV6YwK07dPbzFz77zJaBcfF6ABVfgNwaxVgXc2G+o0e/tzLCF9WU8Ryp1r0Nkk6JuJNsWCzbb4cLOMlB+Q==,
+      }
+    engines: { node: ">= 12" }
+    dev: false
 
   /fast-decode-uri-component@1.0.1:
     resolution:

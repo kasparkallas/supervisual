@@ -65,9 +65,9 @@ export function CustomNode2({ dragging, selected, data }: NodeProps<MyNode>) {
       <div className="flex flex-col items-center gap-1">
         <Jazzicon
           paperStyles={{
-            "border-width": 2,
-            "border-radius": "50%",
-            "border-color": "black",
+            borderWidth: 2,
+            borderRadius: "50%",
+            borderColor: "black",
           }}
           diameter={50}
           seed={jsNumberForAddress(data.address)}
