@@ -45,6 +45,7 @@
     "subgraph": "workspace:*",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
+    "tinycolor2": "^1.6.0",
     "use-async-effect": "^2.2.7",
     "viem": "^2.8.5",
     "zod": "^3.22.4"
@@ -57,6 +58,7 @@
     "@types/node": "^20.11.27",
     "@types/react": "^18.2.65",
     "@types/react-dom": "^18.2.22",
+    "@types/tinycolor2": "^1.4.6",
     "@typescript-eslint/eslint-plugin": "^6.20.0",
     "@typescript-eslint/parser": "^6.20.0",
     "@vitejs/plugin-react": "^4.2.1",

@@ -20,7 +20,7 @@ export type MyNode = Node<{
 }> &
   Label;
 
-export type PartialNode = {
+type PartialNode = {
   id: string;
   data: Partial<MyNode["data"]> &
     Pick<
@@ -32,13 +32,23 @@ export type PartialNode = {
     >;
 };
 
-export type MyEdge = Edge<{
+type MyEdgeData = {
   flowRate: bigint;
   token: {
     id: string;
     symbol: string;
   };
-}>;
+  something: {
+    length: number;
+    index: number;
+  };
+};
+
+export type MyEdge = Edge<MyEdgeData>;
+
+type PartialEdge = Edge<
+  Partial<MyEdgeData> & Pick<MyEdgeData, "flowRate" | "token">
+>;
 
 export type MyMappedData = {
   nodes: MyNode[];
@@ -211,7 +221,7 @@ function mapNodes(chain: number, data: AllRelevantEntitiesQuery): MyNode[] {
 }
 
 function mapEdges(data: AllRelevantEntitiesQuery): MyEdge[] {
-  const edgesFromPoolDistributors: MyEdge[] = data.poolDistributors
+  const edgesFromPoolDistributors: PartialEdge[] = data.poolDistributors
     .map((x) => [
       {
         id: `${x.pool.token.id}-${x.account.id}-${x.pool.id}`,
@@ -228,7 +238,7 @@ function mapEdges(data: AllRelevantEntitiesQuery): MyEdge[] {
     ])
     .flat();
 
-  const edgesFromPoolMembers: MyEdge[] = data.poolMembers
+  const edgesFromPoolMembers: PartialEdge[] = data.poolMembers
     .map((x) => [
       {
         id: `${x.pool.token.id}-${x.pool.id}-${x.account.id}`,
@@ -257,7 +267,7 @@ function mapEdges(data: AllRelevantEntitiesQuery): MyEdge[] {
     ])
     .flat();
 
-  const edgesFromStreams: MyEdge[] = data.streams
+  const edgesFromStreams: PartialEdge[] = data.streams
     .map((x) => [
       {
         id: `${x.token.id}-${x.sender.id}-${x.receiver.id}`,
@@ -274,13 +284,13 @@ function mapEdges(data: AllRelevantEntitiesQuery): MyEdge[] {
     ])
     .flat();
 
-  const edgesButRedundant: MyEdge[] = [
+  const edgesButRedundant: PartialEdge[] = [
     ...edgesFromPoolMembers,
     ...edgesFromStreams,
     ...edgesFromPoolDistributors,
   ];
 
-  const uniqEdges: MyEdge[] = Object.entries(
+  const uniqEdges: PartialEdge[] = Object.entries(
     groupBy(edgesButRedundant, (x) => x.id),
   ).map(([, edgesFromDifferentSources]) => {
     const root = edgesFromDifferentSources[0];
@@ -300,11 +310,34 @@ function mapEdges(data: AllRelevantEntitiesQuery): MyEdge[] {
     };
   });
 
-  const edgesWithFullData = uniqEdges.map((x) => ({
-    ...x,
-    animated: true,
-    type: "floating",
-  }));
+  // const edgesWithAlmostFullData = uniqEdges.map((x) => ({
+  //   ...x,
+  //   data: {
+  //     ...x.data,
+  //   },
+  // }));
+
+  const edgesBetweenSameNodes = groupBy(uniqEdges, (x) =>
+    [x.source, x.target].sort().join("-"),
+  );
+
+  // const grouped = groupBy(edgesWithAlmostFullData, (x) => x.data.something.key);
+
+  const edgesWithFullData: MyEdge[] = uniqEdges.map((x) => {
+    const key = [x.source, x.target].sort().join("-");
+    return {
+      ...x,
+      animated: true,
+      type: "floating",
+      data: {
+        ...x.data!,
+        something: {
+          length: edgesBetweenSameNodes[key].length,
+          index: edgesBetweenSameNodes[key].indexOf(x),
+        },
+      },
+    };
+  });
 
   return edgesWithFullData;
 }

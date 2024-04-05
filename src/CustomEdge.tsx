@@ -13,19 +13,98 @@ import { memoize } from "lodash";
 import { FastAverageColor } from "fast-average-color";
 import { extendedSuperTokenList } from "@superfluid-finance/tokenlist";
 import { useQuery } from "@tanstack/react-query";
+import Tinycolor2 from "tinycolor2";
 
-const fac = new FastAverageColor();
+const fastAverageColor = new FastAverageColor();
 
-const getTokenAverageColor = memoize((tokenAddress: Address) => {
-  console.log("foo");
+const getTokenListEntry = memoize((tokenAddress: Address) => {
   const addressLowerCased = tokenAddress.toLowerCase();
-  const tokenListEntry = extendedSuperTokenList.tokens.find(
+  return extendedSuperTokenList.tokens.find(
     (x) => x.address.toLowerCase() === addressLowerCased,
   );
+});
+
+const getTokenAverageColor = memoize(async (tokenAddress: Address) => {
+  const tokenListEntry = getTokenListEntry(tokenAddress);
+
   if (tokenListEntry && tokenListEntry.logoURI) {
-    return fac.getColorAsync(tokenListEntry.logoURI);
+    const color = await fastAverageColor.getColorAsync(tokenListEntry.logoURI);
+    const tinycolor = new Tinycolor2(color.hexa);
+
+    if (tinycolor.isLight()) {
+      return tinycolor.desaturate(10).toHexString();
+    } else {
+      return tinycolor.lighten(5).toHexString();
+    }
   }
 });
+
+// this is used for straight edges and simple smoothstep edges (LTR, RTL, BTT, TTB)
+export function getEdgeCenter({
+  sourceX,
+  sourceY,
+  targetX,
+  targetY,
+}: {
+  sourceX: number;
+  sourceY: number;
+  targetX: number;
+  targetY: number;
+}): [number, number, number, number] {
+  const xOffset = Math.abs(targetX - sourceX) / 2;
+  const centerX = targetX < sourceX ? targetX + xOffset : targetX - xOffset;
+
+  const yOffset = Math.abs(targetY - sourceY) / 2;
+  const centerY = targetY < sourceY ? targetY + yOffset : targetY - yOffset;
+
+  return [centerX, centerY, xOffset, yOffset];
+}
+
+export function getCurvedPath({
+  sourceX,
+  sourceY,
+  targetX,
+  targetY,
+  something,
+}: Parameters<typeof getStraightPath>[0] & {
+  something?: {
+    length: number;
+    index: number;
+  };
+}): [
+  path: string,
+  labelX: number,
+  labelY: number,
+  offsetX: number,
+  offsetY: number,
+] {
+  const [labelX, labelY, offsetX, offsetY] = getEdgeCenter({
+    sourceX,
+    sourceY,
+    targetX,
+    targetY,
+  });
+
+  let incrementor = 0;
+  if (something && something.length > 1) {
+    if (something.index % 2 === 0) {
+      incrementor = (something.index + 1) * 15;
+    } else {
+      incrementor = something.index * -15;
+    }
+  }
+
+  const controlPointX = (sourceX + targetX) / 2 + incrementor;
+  const controlPointY = (sourceY + targetY) / 2 + incrementor;
+
+  return [
+    `M ${sourceX},${sourceY} Q ${controlPointX},${controlPointY} ${targetX},${targetY}`,
+    labelX,
+    labelY,
+    offsetX,
+    offsetY,
+  ];
+}
 
 export default function CustomEdge({
   id,
@@ -36,11 +115,12 @@ export default function CustomEdge({
   selected,
   data,
 }: EdgeProps<MyEdge["data"]>) {
-  const [edgePath, labelX, labelY] = getSimpleBezierPath({
+  const [edgePath, labelX, labelY] = getCurvedPath({
     sourceX,
     sourceY,
     targetX,
     targetY,
+    something: data?.something,
   });
 
   const { token, flowRate } = data!; // todo: bang
@@ -55,6 +135,8 @@ export default function CustomEdge({
     queryFn: () => getTokenAverageColor(token.id as Address),
   });
 
+  const tokenListEntry = getTokenListEntry(token.id as Address);
+
   return (
     <>
       <BaseEdge
@@ -62,7 +144,7 @@ export default function CustomEdge({
         path={edgePath}
         style={{
           strokeWidth: 4,
-          stroke: tokenColor ? tokenColor.rgb : undefined,
+          stroke: tokenColor ? tokenColor : undefined,
         }}
       />
       {selected && (
@@ -80,7 +162,16 @@ export default function CustomEdge({
             }}
             className="nodrag nopan bg-neutral-50"
           >
-            {flowRatePerDayString}
+            <div className="flex flex-row items-center gap-1">
+              {tokenListEntry?.logoURI && (
+                <img
+                  alt={`${token.symbol} icon`}
+                  src={tokenListEntry?.logoURI}
+                  className="h-5 w-5 object-contain"
+                ></img>
+              )}
+              <span>{flowRatePerDayString}</span>
+            </div>
           </div>
         </EdgeLabelRenderer>
       )}
