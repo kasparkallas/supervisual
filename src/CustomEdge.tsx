@@ -2,6 +2,8 @@ import {
   BaseEdge,
   EdgeLabelRenderer,
   EdgeProps,
+  getBezierPath,
+  getSimpleBezierPath,
   getStraightPath,
 } from "reactflow";
 import { MyEdge } from "./dataMapper";
@@ -17,7 +19,7 @@ export default function CustomEdge({
   selected,
   data,
 }: EdgeProps<MyEdge["data"]>) {
-  const [edgePath, labelX, labelY] = getStraightPath({
+  const [edgePath, labelX, labelY] = getSimpleBezierPath({
     sourceX,
     sourceY,
     targetX,
@@ -37,7 +39,7 @@ export default function CustomEdge({
         id={id}
         path={edgePath}
         style={{
-          strokeWidth: 5,
+          strokeWidth: 4,
         }}
       />
       {selected && (

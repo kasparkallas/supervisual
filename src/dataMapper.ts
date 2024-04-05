@@ -302,11 +302,8 @@ function mapEdges(data: AllRelevantEntitiesQuery): MyEdge[] {
 
   const edgesWithFullData = uniqEdges.map((x) => ({
     ...x,
-    animated: uniqEdges.length < 75,
+    animated: true,
     type: "floating",
-    style: {
-      strokeWidth: 3,
-    },
   }));
 
   return edgesWithFullData;
