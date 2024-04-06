@@ -85,21 +85,20 @@ export function CustomNode2({ dragging, selected, data }: NodeProps<MyNode>) {
       borderWidth: 2,
       borderRadius: "50%",
       borderColor: "black",
-      height: "50px",
-      width: "50px",
     };
 
     return (
       <div className="flex flex-col items-center gap-1">
         {profile?.avatar ? (
           <img
-            className="rounded-full"
+            className="h-[50px] w-[50px] rounded-full"
             style={basePaperStyles}
             src={profile.avatar.md}
           ></img>
         ) : (
           <Jazzicon
             paperStyles={basePaperStyles}
+            diameter={50}
             seed={jsNumberForAddress(data.address)}
           />
         )}

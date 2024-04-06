@@ -32,7 +32,7 @@ const getTokenAverageColor = memoize(async (tokenAddress: Address) => {
     const tinycolor = new Tinycolor2(color.hexa);
 
     if (tinycolor.isLight()) {
-      return tinycolor.desaturate(10).toHexString();
+      return tinycolor.desaturate(5).toHexString();
     } else {
       return tinycolor.lighten(5).toHexString();
     }
@@ -143,7 +143,7 @@ export default function CustomEdge({
         id={id}
         path={edgePath}
         style={{
-          strokeWidth: 4,
+          strokeWidth: 3,
           stroke: tokenColor ? tokenColor : undefined,
         }}
       />
