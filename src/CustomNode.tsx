@@ -13,22 +13,42 @@ import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { Address } from "viem";
 import * as HoverCardPrimitive from "@radix-ui/react-hover-card";
 import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
+import { useQuery } from "@tanstack/react-query";
 
 const route = getRouteApi("/");
 
+type ProfileResponse = {
+  name: string;
+  avatar?: {
+    xs: string;
+    sm: string;
+    md: string;
+    lg: string;
+  };
+};
+
 export function CustomNode2({ dragging, selected, data }: NodeProps<MyNode>) {
+  const { data: profile } = useQuery({
+    queryKey: ["ens", data.address],
+    queryFn: () =>
+      fetch(`https://ens.kasparkallas.com/address/${data.address}`).then((x) =>
+        x.status === 200 ? (x.json() as unknown as ProfileResponse) : null,
+      ),
+  });
+
   const label = useMemo(() => {
     return (
       <span
         className={cn(
-          "font-mono text-sm",
+          "text-sm",
+          !profile?.name ? "font-mono" : "",
           data.isSelected ? "font-extrabold" : "",
         )}
       >
-        {data?.label}
+        {profile?.name ?? data?.label}
       </span>
     );
-  }, [data.label, data.isSelected]);
+  }, [data.label, data.isSelected, profile?.name]);
 
   const look = useMemo(() => {
     if (data.isPool) {
@@ -61,21 +81,32 @@ export function CustomNode2({ dragging, selected, data }: NodeProps<MyNode>) {
       );
     }
 
+    const basePaperStyles = {
+      borderWidth: 2,
+      borderRadius: "50%",
+      borderColor: "black",
+      height: "50px",
+      width: "50px",
+    };
+
     return (
       <div className="flex flex-col items-center gap-1">
-        <Jazzicon
-          paperStyles={{
-            borderWidth: 2,
-            borderRadius: "50%",
-            borderColor: "black",
-          }}
-          diameter={50}
-          seed={jsNumberForAddress(data.address)}
-        />
+        {profile?.avatar ? (
+          <img
+            className="rounded-full"
+            style={basePaperStyles}
+            src={profile.avatar.md}
+          ></img>
+        ) : (
+          <Jazzicon
+            paperStyles={basePaperStyles}
+            seed={jsNumberForAddress(data.address)}
+          />
+        )}
         {label}
       </div>
     );
-  }, [data, label]);
+  }, [data, label, profile?.avatar]);
 
   return (
     <>
