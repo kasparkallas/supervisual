@@ -74,19 +74,48 @@ export const dataMapper = (
 };
 
 function mapNodes(chain: number, data: AllRelevantEntitiesQuery): MyNode[] {
-  const nodesFromAccounts: PartialNode[] = data.accounts.map((x) => ({
+  const nodesFromAccounts: PartialNode[] = data.selectedAccounts.map((x) => ({
     id: x.id,
     data: {
       isSuperApp: x.isSuperApp,
-      createdAtBlockNumber: Number(x.createdAtBlockNumber),
-      createdAtTimestamp: Number(x.createdAtTimestamp),
-      updatedAtBlockNumber: Number(x.updatedAtBlockNumber),
-      updatedAtTimestamp: Number(x.updatedAtTimestamp),
+      createdAtBlockNumber:
+        Math.min(
+          ...x.accountTokenSnapshots.map((y) => Number(y.createdAtBlockNumber)),
+        ) ?? Number(x.createdAtBlockNumber),
+      createdAtTimestamp:
+        Math.min(
+          ...x.accountTokenSnapshots.map((y) => Number(y.createdAtTimestamp)),
+        ) ?? Number(x.createdAtTimestamp),
+      updatedAtBlockNumber:
+        Math.max(
+          ...x.accountTokenSnapshots.map((y) => Number(y.updatedAtBlockNumber)),
+        ) ?? Number(x.updatedAtBlockNumber),
+      updatedAtTimestamp:
+        Math.max(
+          ...x.accountTokenSnapshots.map((y) => Number(y.updatedAtTimestamp)),
+        ) ?? Number(x.updatedAtTimestamp),
       isSelected: true,
     },
   }));
 
+  const nodesFromPools: PartialNode[] = data.selectedPools
+    .map((x) => [
+      {
+        id: x.id,
+        data: {
+          isPool: true,
+          isSelected: true,
+          createdAtBlockNumber: Number(x.createdAtBlockNumber),
+          createdAtTimestamp: Number(x.createdAtTimestamp),
+          updatedAtBlockNumber: Number(x.updatedAtBlockNumber),
+          updatedAtTimestamp: Number(x.updatedAtTimestamp),
+        },
+      },
+    ])
+    .flat();
+
   const nodesFromPoolMembers: PartialNode[] = data.poolMembers
+    .concat(data.selectedPools.map((x) => x.poolMembers).flat())
     .map((x) => [
       {
         id: x.pool.id,
@@ -112,6 +141,7 @@ function mapNodes(chain: number, data: AllRelevantEntitiesQuery): MyNode[] {
     .flat();
 
   const nodesFromPoolDistributors: PartialNode[] = data.poolDistributors
+    .concat(data.selectedPools.map((x) => x.poolDistributors).flat())
     .map((x) => [
       {
         id: x.pool.id,
@@ -222,6 +252,7 @@ function mapNodes(chain: number, data: AllRelevantEntitiesQuery): MyNode[] {
 
 function mapEdges(data: AllRelevantEntitiesQuery): MyEdge[] {
   const edgesFromPoolDistributors: PartialEdge[] = data.poolDistributors
+    .concat(data.selectedPools.map((x) => x.poolDistributors).flat())
     .map((x) => [
       {
         id: `${x.pool.token.id}-${x.account.id}-${x.pool.id}`,
@@ -239,6 +270,7 @@ function mapEdges(data: AllRelevantEntitiesQuery): MyEdge[] {
     .flat();
 
   const edgesFromPoolMembers: PartialEdge[] = data.poolMembers
+    .concat(data.selectedPools.map((x) => x.poolMembers).flat())
     .map((x) => [
       {
         id: `${x.pool.token.id}-${x.pool.id}-${x.account.id}`,

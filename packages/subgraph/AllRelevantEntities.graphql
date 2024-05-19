@@ -94,13 +94,82 @@ query AllRelevantEntities(
     }
     currentFlowRate
   }
-  accounts(where: { id_in: $accounts_bytes }) {
+  selectedAccounts: accounts(first: 1000, where: { id_in: $accounts_bytes }) {
     id
     isSuperApp
     createdAtBlockNumber
     createdAtTimestamp
     updatedAtBlockNumber
     updatedAtTimestamp
+    accountTokenSnapshots(where: { token_in: $tokens }) {
+      createdAtBlockNumber
+      createdAtTimestamp
+      updatedAtBlockNumber
+      updatedAtTimestamp
+    }
+  }
+  selectedPools: pools(
+    block: $block
+    first: 1000
+    where: { id_in: $accounts_bytes }
+  ) {
+    id
+    createdAtBlockNumber
+    createdAtTimestamp
+    updatedAtBlockNumber
+    updatedAtTimestamp
+    poolMembers(
+      first: 1000
+      where: { units_not: "0", pool_: { flowRate_not: "0" } }
+    ) {
+      createdAtBlockNumber
+      createdAtTimestamp
+      updatedAtBlockNumber
+      updatedAtTimestamp
+      units
+      account {
+        id
+        isSuperApp
+      }
+      pool {
+        createdAtBlockNumber
+        createdAtTimestamp
+        updatedAtBlockNumber
+        updatedAtTimestamp
+        id
+        flowRate
+        totalUnits
+        token {
+          id
+          symbol
+        }
+      }
+    }
+    poolDistributors(
+      first: 1000
+      where: { pool_: { token_in: $tokens }, flowRate_not: "0" }
+    ) {
+      createdAtBlockNumber
+      createdAtTimestamp
+      updatedAtBlockNumber
+      updatedAtTimestamp
+      flowRate
+      account {
+        id
+        isSuperApp
+      }
+      pool {
+        createdAtBlockNumber
+        createdAtTimestamp
+        updatedAtBlockNumber
+        updatedAtTimestamp
+        id
+        token {
+          id
+          symbol
+        }
+      }
+    }
   }
   _meta {
     block {

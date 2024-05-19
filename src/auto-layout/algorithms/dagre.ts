@@ -9,7 +9,7 @@ const dagreLayout: LayoutAlgorithm = (nodes, edges, options) => {
     // align: "UR",
     nodesep: options.spacing[0],
     ranksep: options.spacing[1],
-    acyclicer: "greedy",
+    acyclicer: "",
   });
 
   for (const node of nodes) {

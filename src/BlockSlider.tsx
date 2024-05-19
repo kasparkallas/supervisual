@@ -86,7 +86,7 @@ export function BlockSlider({ block, nodes, latestBlock }: Props) {
   return (
     <div
       className={cn(
-        "flex min-w-96 flex-col gap-3",
+        "flex w-[90vw] max-w-3xl flex-col gap-3",
         averageBlockTime === 0 ? "invisible" : "",
       )}
     >
