@@ -2,18 +2,13 @@ import { memo, useEffect, useMemo, useState } from "react";
 import { Handle, NodeProps, NodeToolbar, Position } from "reactflow";
 import { MyNode } from "./dataMapper";
 import { cn } from "./lib/utils";
-import {
-  HoverCard,
-  HoverCardTrigger,
-  HoverCardContent,
-} from "./components/ui/hover-card";
 import { Button } from "./components/ui/button";
 import copy from "copy-text-to-clipboard";
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { Address } from "viem";
-import * as HoverCardPrimitive from "@radix-ui/react-hover-card";
 import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
 import { useQuery } from "@tanstack/react-query";
+import { alfaFrensNames } from "./lib/alfaFrensNames";
 
 const route = getRouteApi("/");
 
@@ -27,14 +22,64 @@ type ProfileResponse = {
   };
 };
 
-export function CustomNode2({ dragging, selected, data }: NodeProps<MyNode>) {
+export function CustomNode2({
+  dragging,
+  selected,
+  data,
+}: NodeProps<MyNode["data"]>) {
+  const { data: alfaChannelInfo } = useQuery({
+    enabled: data.chain === 8453 && data.isSuperApp,
+    queryKey: ["alfaChannel", data.address],
+    queryFn: () => {
+      const addressLowerCased = data.address.toLowerCase();
+      const alfaInfo =
+        alfaFrensNames.find(
+          (x) => x.channelAddress.toLowerCase() === addressLowerCased,
+        ) ?? null;
+      if (alfaInfo) {
+        const channelName = `${alfaInfo.handle}'s channel`;
+        return {
+          channelName,
+        };
+      } else {
+        return null;
+      }
+    },
+  });
+
+  const { data: alfaProfileInfo } = useQuery({
+    enabled: data.chain === 8453 && !data.isSuperApp && !data.isPool,
+    queryKey: ["alfaProfile", data.address],
+    queryFn: () => {
+      const addressLowerCased = data.address.toLowerCase();
+      const alfaInfo =
+        alfaFrensNames.find(
+          (x) => x.aaAddress.toLowerCase() === addressLowerCased,
+        ) ?? null;
+      if (alfaInfo) {
+        return {
+          name: alfaInfo.handle,
+          avatar: alfaInfo.avatar,
+        };
+      } else {
+        return null;
+      }
+    },
+  });
+
   const { data: profile } = useQuery({
+    enabled:
+      !data.isSuperApp && !data.isPool && !alfaProfileInfo && !alfaChannelInfo,
     queryKey: ["ens", data.address],
     queryFn: () =>
       fetch(`https://ens.kasparkallas.com/address/${data.address}`).then((x) =>
         x.status === 200 ? (x.json() as unknown as ProfileResponse) : null,
       ),
   });
+
+  const displayName =
+    alfaProfileInfo?.name ?? alfaChannelInfo?.channelName ?? profile?.name;
+  const avatar = alfaProfileInfo?.avatar ?? profile?.avatar?.md;
 
   const label = useMemo(() => {
     return (
@@ -45,10 +90,10 @@ export function CustomNode2({ dragging, selected, data }: NodeProps<MyNode>) {
           data.isSelected ? "font-extrabold" : "",
         )}
       >
-        {profile?.name ?? data?.label}
+        {displayName ?? data?.label}
       </span>
     );
-  }, [data.label, data.isSelected, profile?.name]);
+  }, [data.label, data.isSelected, displayName]);
 
   const look = useMemo(() => {
     if (data.isPool) {
@@ -89,11 +134,11 @@ export function CustomNode2({ dragging, selected, data }: NodeProps<MyNode>) {
 
     return (
       <div className="flex flex-col items-center gap-1">
-        {profile?.avatar ? (
+        {avatar ? (
           <img
             className="h-[50px] w-[50px] rounded-full"
             style={basePaperStyles}
-            src={profile.avatar.md}
+            src={avatar}
           ></img>
         ) : (
           <Jazzicon
@@ -124,7 +169,7 @@ export function CustomNode2({ dragging, selected, data }: NodeProps<MyNode>) {
   );
 }
 
-function CustomNode(props: NodeProps<MyNode>) {
+function CustomNode(props: NodeProps<MyNode["data"]>) {
   const { dragging, selected, data } = props;
   const navigate = useNavigate();
 
