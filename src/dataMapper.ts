@@ -283,7 +283,7 @@ function mapEdges(data: AllRelevantEntitiesQuery): MyEdge[] {
           },
           flowRate:
             BigInt(x.units) > 0
-              ? (BigInt(x.pool.flowRate) * BigInt(x.pool.totalUnits)) /
+              ? (BigInt(x.pool.flowRate) / BigInt(x.pool.totalUnits)) *
                 BigInt(x.units)
               : 0n,
         },
