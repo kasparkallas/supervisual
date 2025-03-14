@@ -37,6 +37,8 @@ const getTokenAverageColor = memoize(async (tokenAddress: Address) => {
       return tinycolor.lighten(5).toHexString();
     }
   }
+
+  return "#000000";
 });
 
 // this is used for straight edges and simple smoothstep edges (LTR, RTL, BTT, TTB)
@@ -131,7 +133,7 @@ export default function CustomEdge({
   }, [flowRate, token]);
 
   const { data: tokenColor } = useQuery({
-    queryKey: ["tokenAverageColor", token.id],
+    queryKey: ["tokenAverageColor", token.id ?? null],
     queryFn: () => getTokenAverageColor(token.id as Address),
   });
 

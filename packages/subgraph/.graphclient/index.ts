@@ -25551,7 +25551,7 @@ export const AllRelevantEntitiesDocument = gql`
       where: {
         account_in: $accounts
         units_not: "0"
-        pool_: { flowRate_not: "0" }
+        pool_: { flowRate_not: "0", token_in: $tokens }
       }
     ) {
       createdAtBlockNumber

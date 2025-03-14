@@ -8,7 +8,7 @@ import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { Address } from "viem";
 import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
 import { useQuery } from "@tanstack/react-query";
-import { alfaFrensNames } from "./lib/alfaFrensNames";
+import { useAddressDisplayInfo } from "./useAddressDisplayInfo";
 
 const route = getRouteApi("/");
 
@@ -27,73 +27,24 @@ export function CustomNode2({
   selected,
   data,
 }: NodeProps<MyNode["data"]>) {
-  const { data: alfaChannelInfo } = useQuery({
-    enabled: data.chain === 8453 && data.isSuperApp,
-    queryKey: ["alfaChannel", data.address],
-    queryFn: () => {
-      const addressLowerCased = data.address.toLowerCase();
-      const alfaInfo =
-        alfaFrensNames.find(
-          (x) => x.channelAddress.toLowerCase() === addressLowerCased,
-        ) ?? null;
-      if (alfaInfo) {
-        const channelName = `${alfaInfo.handle}'s channel`;
-        return {
-          channelName,
-        };
-      } else {
-        return null;
-      }
-    },
-  });
-
-  const { data: alfaProfileInfo } = useQuery({
-    enabled: data.chain === 8453 && !data.isSuperApp && !data.isPool,
-    queryKey: ["alfaProfile", data.address],
-    queryFn: () => {
-      const addressLowerCased = data.address.toLowerCase();
-      const alfaInfo =
-        alfaFrensNames.find(
-          (x) => x.aaAddress.toLowerCase() === addressLowerCased,
-        ) ?? null;
-      if (alfaInfo) {
-        return {
-          name: alfaInfo.handle,
-          avatar: alfaInfo.avatar,
-        };
-      } else {
-        return null;
-      }
-    },
-  });
-
-  const { data: profile } = useQuery({
-    enabled:
-      !data.isSuperApp && !data.isPool && !alfaProfileInfo && !alfaChannelInfo,
-    queryKey: ["ens", data.address],
-    queryFn: () =>
-      fetch(`https://ens.kasparkallas.com/address/${data.address}`).then((x) =>
-        x.status === 200 ? (x.json() as unknown as ProfileResponse) : null,
-      ),
-  });
-
-  const displayName =
-    alfaProfileInfo?.name ?? alfaChannelInfo?.channelName ?? profile?.name;
-  const avatar = alfaProfileInfo?.avatar ?? profile?.avatar?.md;
+  const findDisplayInfo = !data.isSuperApp && !data.isPool;
+  const addressDisplayInfo = useAddressDisplayInfo(
+    findDisplayInfo ? data.address : undefined,
+  );
 
   const label = useMemo(() => {
     return (
       <span
         className={cn(
           "text-sm",
-          !profile?.name ? "font-mono" : "",
+          !addressDisplayInfo?.primaryName ? "font-mono" : "",
           data.isSelected ? "font-extrabold" : "",
         )}
       >
-        {displayName ?? data?.label}
+        {addressDisplayInfo?.primaryName ?? data?.label}
       </span>
     );
-  }, [data.label, data.isSelected, displayName]);
+  }, [data.label, data.isSelected, addressDisplayInfo]);
 
   const look = useMemo(() => {
     if (data.isPool) {
@@ -134,11 +85,11 @@ export function CustomNode2({
 
     return (
       <div className="flex flex-col items-center gap-1">
-        {avatar ? (
+        {addressDisplayInfo?.primaryAvatarUrl ? (
           <img
             className="h-[50px] w-[50px] rounded-full"
             style={basePaperStyles}
-            src={avatar}
+            src={addressDisplayInfo.primaryAvatarUrl}
           ></img>
         ) : (
           <Jazzicon
@@ -150,7 +101,7 @@ export function CustomNode2({
         {label}
       </div>
     );
-  }, [data, label, profile?.avatar]);
+  }, [data, label, addressDisplayInfo]);
 
   return (
     <>
@@ -240,7 +191,11 @@ function CustomNode(props: NodeProps<MyNode["data"]>) {
           <Button size="sm" className="text-xs" variant="outline" asChild>
             <a
               target="_blank"
-              href={`https://console.superfluid.finance/${data.chain!}/accounts/${data.address}`}
+              href={
+                data.isPool
+                  ? `https://console.superfluid.finance/${data.chain!}/pools/${data.address}`
+                  : `https://console.superfluid.finance/${data.chain!}/accounts/${data.address}`
+              }
             >
               View in Console
             </a>

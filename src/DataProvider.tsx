@@ -16,7 +16,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { DiagramInput } from "./diagramInputSchema";
 import { Button } from "./components/ui/button";
 import { DataForm } from "./DataForm";
-import { memoize } from "lodash";
+import { memoize, uniq } from "lodash";
 import sfMeta from "@superfluid-finance/metadata";
 import { BlockSlider } from "./BlockSlider";
 import { useId, useMemo, useState } from "react";
@@ -101,9 +101,9 @@ function DataProvider({ chain, tokens, accounts, block }: Props) {
 
         {/* </div> */}
       </Panel>
-      <Panel position="bottom-center">
+      {/* <Panel position="bottom-center">
         <BlockSlider block={block} {...mappedData} />
-      </Panel>
+      </Panel> */}
       <Diagram key={key} nodes={mappedData.nodes} edges={mappedData.edges} />
     </>
   );
