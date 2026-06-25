@@ -7,20 +7,9 @@ import copy from "copy-text-to-clipboard";
 import { getRouteApi } from "@tanstack/react-router";
 import { Address } from "viem";
 import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
-import { useQuery } from "@tanstack/react-query";
 import { useAddressDisplayInfo } from "./useAddressDisplayInfo";
 
 const route = getRouteApi("/");
-
-type ProfileResponse = {
-  name: string;
-  avatar?: {
-    xs: string;
-    sm: string;
-    md: string;
-    lg: string;
-  };
-};
 
 export function CustomNode2({
   dragging,
