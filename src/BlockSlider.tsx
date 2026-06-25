@@ -1,4 +1,4 @@
-import { getRouteApi, useNavigate } from "@tanstack/react-router";
+import { getRouteApi } from "@tanstack/react-router";
 import { Slider } from "./components/ui/slider";
 import sfMeta from "@superfluid-finance/metadata";
 import { useQuery } from "@tanstack/react-query";
@@ -21,7 +21,7 @@ type Props = {
 } & MyMappedData;
 
 export function BlockSlider({ block, nodes, latestBlock }: Props) {
-  const navigate = useNavigate();
+  const navigate = route.useNavigate();
   const search = route.useSearch();
 
   const { min, max, averageBlockTime } = useMemo(() => {

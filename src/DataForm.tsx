@@ -10,7 +10,7 @@ import {
   Form,
 } from "./components/ui/form";
 import { Input } from "./components/ui/input";
-import { getRouteApi, useNavigate } from "@tanstack/react-router";
+import { getRouteApi } from "@tanstack/react-router";
 import { z } from "zod";
 import { ethereumAddressCollectionSchema } from "./diagramInputSchema";
 import { Address } from "viem";
@@ -50,7 +50,7 @@ const mapAddressesIntoFieldArray = (addresses: Address[]) => {
 const route = getRouteApi("/");
 
 export function DataForm(props: { onSubmit: () => void }) {
-  const navigate = useNavigate();
+  const navigate = route.useNavigate();
   const search = route.useSearch();
 
   const form = useForm<FormInput, any, FormOutput>({
