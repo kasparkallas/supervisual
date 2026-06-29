@@ -7,7 +7,8 @@ import {
   getStraightPath,
 } from "reactflow";
 import { MyEdge } from "./dataMapper";
-import { Address, formatEther } from "viem";
+import { Address } from "viem";
+import { formatFlowRatePerDay } from "./lib/formatFlowRate";
 import { useMemo } from "react";
 import { memoize } from "lodash";
 import { FastAverageColor } from "fast-average-color";
@@ -127,10 +128,10 @@ export default function CustomEdge({
 
   const { token, flowRate } = data!; // todo: bang
 
-  const flowRatePerDayString = useMemo(() => {
-    const flowRatePerDay = flowRate * 86400n;
-    return `${formatEther(flowRatePerDay)} ${token.symbol}/day`;
-  }, [flowRate, token]);
+  const flowRatePerDayString = useMemo(
+    () => formatFlowRatePerDay(flowRate, token.symbol),
+    [flowRate, token],
+  );
 
   const { data: tokenColor } = useQuery({
     queryKey: ["tokenAverageColor", token.id ?? null],

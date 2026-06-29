@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
+import { useMemo } from "react";
 import { Button } from "./components/ui/button";
 import {
   FormField,
@@ -9,43 +10,36 @@ import {
   FormMessage,
   Form,
 } from "./components/ui/form";
-import { Input } from "./components/ui/input";
 import { getRouteApi } from "@tanstack/react-router";
 import { z } from "zod";
-import { ethereumAddressCollectionSchema } from "./diagramInputSchema";
-import { Address } from "viem";
+import { uniq } from "lodash";
+import { ethereumAddressSchema } from "./diagramInputSchema";
 import {
   Select,
   SelectTrigger,
   SelectValue,
   SelectContent,
+  SelectGroup,
+  SelectLabel,
   SelectItem,
 } from "./components/ui/select";
 import sfMeta from "@superfluid-finance/metadata";
+import { TokenMultiSelect } from "./TokenMultiSelect";
+import { AccountMultiSelect } from "./AccountMultiSelect";
 
-const ethereumAddressFieldArraySchema = z
-  .array(
-    z.object({
-      value: z.string().trim().optional(),
-    }),
-  )
-  .transform((x) => x.filter((y) => y.value).map((y) => y.value))
-  .pipe(ethereumAddressCollectionSchema);
+const addressArraySchema = z
+  .array(ethereumAddressSchema)
+  .transform((x) => uniq(x))
+  .default([]);
 
 const formSchema = z.object({
   chain: z.string().default("10").pipe(z.coerce.number()),
-  tokens: ethereumAddressFieldArraySchema,
-  accounts: ethereumAddressFieldArraySchema,
+  tokens: addressArraySchema,
+  accounts: addressArraySchema,
 });
 
 export type FormInput = z.input<typeof formSchema>;
 export type FormOutput = z.output<typeof formSchema>;
-
-const mapAddressesIntoFieldArray = (addresses: Address[]) => {
-  return addresses.length
-    ? addresses.map((x) => ({ value: x }))
-    : [{ value: "" }];
-};
 
 const route = getRouteApi("/");
 
@@ -57,24 +51,36 @@ export function DataForm(props: { onSubmit: () => void }) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       chain: search.chain.toString(),
-      tokens: mapAddressesIntoFieldArray(search.tokens),
-      accounts: mapAddressesIntoFieldArray(search.accounts),
+      tokens: search.tokens,
+      accounts: search.accounts,
     },
   });
 
-  const tokensFieldArray = useFieldArray({
-    name: "tokens",
-    control: form.control,
-  });
+  // Networks are static; group them once into mainnets/testnets.
+  const { mainnets, testnets } = useMemo(
+    () => ({
+      mainnets: sfMeta.networks.filter((n) => !n.isTestnet),
+      testnets: sfMeta.networks.filter((n) => n.isTestnet),
+    }),
+    [],
+  );
 
-  const accountsFieldArray = useFieldArray({
-    name: "accounts",
+  // Must be `useWatch` (hook), NOT `form.watch()` (method): the React Compiler
+  // memoizes the method call against the stable `form` object and freezes the
+  // value, so the token list would stick to the initial network.
+  const watchedChain = useWatch({
     control: form.control,
+    name: "chain",
+    defaultValue: search.chain.toString(),
   });
+  const chainId = Number(watchedChain);
 
   function onSubmit(values: FormOutput) {
+    form.clearErrors("root");
+    const chainChanged = values.chain !== search.chain;
     navigate({
-      search: { ...values, block: search.block },
+      // Block heights are chain-specific — drop the historical block on chain switch.
+      search: { ...values, block: chainChanged ? null : search.block },
     });
     props.onSubmit();
   }
@@ -82,10 +88,11 @@ export function DataForm(props: { onSubmit: () => void }) {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit, (e) => {
-          // todo: handle better
-          console.error(e);
-        })}
+        onSubmit={form.handleSubmit(onSubmit, () =>
+          form.setError("root", {
+            message: "Please double-check the addresses you entered.",
+          }),
+        )}
         className="space-y-8"
       >
         <FormField
@@ -95,8 +102,12 @@ export function DataForm(props: { onSubmit: () => void }) {
             <FormItem>
               <FormLabel>Network</FormLabel>
               <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value?.toString()}
+                value={field.value}
+                onValueChange={(next) => {
+                  field.onChange(next);
+                  // Token addresses are chain-specific; clear them on switch.
+                  form.setValue("tokens", []);
+                }}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -104,83 +115,77 @@ export function DataForm(props: { onSubmit: () => void }) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {
-                    // todo: optimize
-                    sfMeta.networks.map((network) => (
+                  <SelectGroup>
+                    <SelectLabel>Mainnets</SelectLabel>
+                    {mainnets.map((network) => (
                       <SelectItem
                         key={network.chainId.toString()}
                         value={network.chainId.toString()}
                       >
                         {network.humanReadableName}
                       </SelectItem>
-                    ))
-                  }
+                    ))}
+                  </SelectGroup>
+                  <SelectGroup>
+                    <SelectLabel>Testnets</SelectLabel>
+                    {testnets.map((network) => (
+                      <SelectItem
+                        key={network.chainId.toString()}
+                        value={network.chainId.toString()}
+                      >
+                        {network.humanReadableName}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
                 </SelectContent>
               </Select>
               <FormMessage />
             </FormItem>
           )}
         />
-        <div>
-          <FormLabel>Tokens</FormLabel>
-          {/* <FormDescription>The tokens...</FormDescription> */}
-          <div className="flex flex-col gap-1">
-            {tokensFieldArray.fields.map((field, index) => (
-              <FormField
-                control={form.control}
-                key={field.id}
-                name={`tokens.${index}.value`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input placeholder="0x..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            ))}
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="mt-2"
-            onClick={() => tokensFieldArray.append({ value: "" })}
-          >
-            Add more
-          </Button>
-        </div>
-        <div>
-          <FormLabel>Accounts</FormLabel>
-          {/* <FormDescription>The accounts...</FormDescription> */}
-          <div className="flex flex-col gap-1">
-            {accountsFieldArray.fields.map((field, index) => (
-              <FormField
-                control={form.control}
-                key={field.id}
-                name={`accounts.${index}.value`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input placeholder="0x..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            ))}
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="mt-2"
-            onClick={() => accountsFieldArray.append({ value: "" })}
-          >
-            Add more
-          </Button>
-        </div>
+
+        <FormField
+          control={form.control}
+          name="tokens"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tokens</FormLabel>
+              <FormControl>
+                <TokenMultiSelect
+                  key={chainId}
+                  chainId={chainId}
+                  value={field.value ?? []}
+                  onChange={field.onChange}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="accounts"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Accounts</FormLabel>
+              <FormControl>
+                <AccountMultiSelect
+                  value={field.value ?? []}
+                  onChange={field.onChange}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {form.formState.errors.root && (
+          <p className="text-sm font-medium text-red-500">
+            {form.formState.errors.root.message}
+          </p>
+        )}
+
         <Button type="submit" className="float-end">
           Save selection
         </Button>

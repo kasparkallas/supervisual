@@ -19,7 +19,7 @@ import { DataForm } from "./DataForm";
 import { memoize, uniq } from "lodash";
 import sfMeta from "@superfluid-finance/metadata";
 import { BlockSlider } from "./BlockSlider";
-import { useId, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 export const graphSDK = memoize((chain: number) => {
   const metadata = sfMeta.getNetworkByChainId(chain);
@@ -36,7 +36,7 @@ type Props = DiagramInput;
 function DataProvider({ chain, tokens, accounts, block }: Props) {
   const hasEnoughInput = Boolean(accounts.length) && Boolean(tokens.length);
 
-  const { data, isPlaceholderData: _isPlaceholderData } = useQuery({
+  const { data } = useQuery({
     queryKey: [
       "chain",
       chain,

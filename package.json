@@ -27,20 +27,19 @@
     "@superfluid-finance/tokenlist": "^5.41.0",
     "@tanstack/react-query": "^5.101.1",
     "@tanstack/react-router": "^1.170.16",
-    "babel-plugin-react-compiler": "0.0.0-experimental-592953e-20240517",
+    "babel-plugin-react-compiler": "^1.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "copy-text-to-clipboard": "^3.2.2",
     "d3-force": "^3.0.0",
     "date-fns": "^3.6.0",
-    "eslint-plugin-react-compiler": "0.0.0-experimental-c8b3f72-20240517",
     "fast-average-color": "^9.5.2",
     "graphql": "^16.14.2",
     "lodash": "^4.18.1",
     "lucide-react": "^0.378.0",
     "query-string": "^9.4.0",
-    "react": "19.0.0-beta-26f2496093-20240514",
-    "react-dom": "19.0.0-beta-26f2496093-20240514",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
     "react-hook-form": "^7.80.0",
     "react-jazzicon": "^1.0.4",
     "reactflow": "^11.11.4",
@@ -48,7 +47,6 @@
     "tailwind-merge": "^2.6.1",
     "tailwindcss-animate": "^1.0.7",
     "tinycolor2": "^1.6.0",
-    "use-async-effect": "^2.2.7",
     "viem": "^2.53.1",
     "zod": "^3.25.76"
   },
@@ -58,8 +56,8 @@
     "@tanstack/router-vite-plugin": "^1.167.18",
     "@types/lodash": "^4.17.24",
     "@types/node": "^20.19.43",
-    "@types/react": "npm:types-react@beta",
-    "@types/react-dom": "npm:types-react-dom@beta",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
     "@types/tinycolor2": "^1.4.6",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
@@ -78,9 +76,11 @@
     "typescript": "^5.9.3",
     "vite": "^5.4.21"
   },
-  "overrides": {
-    "@types/react": "npm:types-react@beta",
-    "@types/react-dom": "npm:types-react-dom@beta"
+  "pnpm": {
+    "overrides": {
+      "@types/react": "^19.2.0",
+      "@types/react-dom": "^19.2.0"
+    }
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
