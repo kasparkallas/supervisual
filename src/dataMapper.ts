@@ -193,6 +193,7 @@ function mapNodes(chain: number, data: AllRelevantEntitiesQuery): MyNode[] {
 
   const nodesButRedundant: PartialNode[] = [
     ...nodesFromAccounts,
+    ...nodesFromPools,
     ...nodesFromPoolMembers,
     ...nodesFromPoolDistributors,
     ...nodesFromStreams,

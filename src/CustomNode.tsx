@@ -4,23 +4,12 @@ import { MyNode } from "./dataMapper";
 import { cn } from "./lib/utils";
 import { Button } from "./components/ui/button";
 import copy from "copy-text-to-clipboard";
-import { getRouteApi, useNavigate } from "@tanstack/react-router";
+import { getRouteApi } from "@tanstack/react-router";
 import { Address } from "viem";
 import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
-import { useQuery } from "@tanstack/react-query";
 import { useAddressDisplayInfo } from "./useAddressDisplayInfo";
 
 const route = getRouteApi("/");
-
-type ProfileResponse = {
-  name: string;
-  avatar?: {
-    xs: string;
-    sm: string;
-    md: string;
-    lg: string;
-  };
-};
 
 export function CustomNode2({
   dragging,
@@ -122,7 +111,7 @@ export function CustomNode2({
 
 function CustomNode(props: NodeProps<MyNode["data"]>) {
   const { dragging, selected, data } = props;
-  const navigate = useNavigate();
+  const navigate = route.useNavigate();
 
   const search = route.useSearch();
 
