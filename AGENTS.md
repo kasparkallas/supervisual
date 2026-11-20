@@ -18,7 +18,7 @@ diagram. URL state is part of the product: a link must reproduce the exact graph
 ## Data
 
 - `packages/subgraph/AllRelevantEntities.graphql` defines the graph boundary.
-  `DataProvider` passes the accounts twice (`accounts` and `accounts_bytes`) —
+  `DataProvider` passes the accounts twice (`accounts` and `accounts_bytes`):
   different subgraph filters expect different scalar types.
 - Subgraph data is all lower-cased; `src/dataMapper.ts` re-checksums node IDs via
   viem `getAddress`.
@@ -27,7 +27,7 @@ diagram. URL state is part of the product: a link must reproduce the exact graph
   member outflow is computed client-side as
   `(pool.flowRate / pool.totalUnits) * member.units`.
 - Identity (ENS/Lens/Farcaster via `whois.superfluid.finance`, in
-  `src/useAddressDisplayInfo.ts`) is best-effort display only — graph correctness
+  `src/useAddressDisplayInfo.ts`) is best-effort display only: graph correctness
   must not depend on it.
 
 ## Rendering
@@ -35,7 +35,7 @@ diagram. URL state is part of the product: a link must reproduce the exact graph
 - Dagre computes only the initial top-to-bottom layout; ReactFlow owns node/edge
   state after mount (custom `"custom"` nodes, `"floating"` edges).
 - `DataProvider` remounts `Diagram` via a `key` whenever fetched data changes, so
-  layout is recomputed from scratch — account for this if adding live updates.
+  layout is recomputed from scratch. Account for this if adding live updates.
 
 ## Dependency landmines
 

@@ -17,4 +17,4 @@ pnpm dev
 
 - Data comes from the Superfluid subgraph (`packages/subgraph`).
 - Account names and avatars come from the Whois API at `whois.superfluid.finance`.
-- [CLAUDE.md](CLAUDE.md) has the editing rules and dependency notes.
+- [AGENTS.md](AGENTS.md) has the editing rules and dependency notes.
