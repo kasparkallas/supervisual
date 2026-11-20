@@ -1,27 +1,20 @@
-# Vite React Flow Template
+# Supervisual
 
-This template creates a very basic [React Flow](https://reactflow.dev) app with [Vite](https://vite.dev).
+Visualizes Superfluid streams (CFA) and distribution pools (GDA) as a diagram. The URL holds the full state (chain, tokens, accounts, block), so a link reproduces the same graph.
 
-## Get it!
+Live at https://supervisual.kazpi.com.
 
-```sh
-npx degit xyflow/vite-react-flow-template app-name
-```
-
-## Installation
+## Run locally
 
 ```sh
-npm run install
+pnpm install
+pnpm dev
 ```
 
-## Development
+`pnpm build` type checks and builds.
 
-```sh
-npm run dev
-```
+## Notes
 
-## Build
-
-```sh
-npm run build
-```
+- Data comes from the Superfluid subgraph (`packages/subgraph`).
+- Account names and avatars come from the Whois API at `whois.superfluid.finance`.
+- [AGENTS.md](AGENTS.md) has the editing rules and dependency notes.
